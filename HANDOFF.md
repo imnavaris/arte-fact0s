@@ -1,64 +1,72 @@
 ---
-type: registro
+type: manual-agente
+scope: proyecto Artefactos de memoria
+status: activo
+sources: [Matu, ejecución local de tools/, docs/VALIDACION.md]
 ---
 
-# HANDOFF: Artefactos de memoria
+# HANDOFF — Artefactos de memoria
 
-Punto de reanudación y memoria técnica. Última sesión de trabajo: 02/11/2026.
+Punto de reanudación. Última sesión de trabajo: 2026-11-02. La obra está completa y calibrada; falta re-correr la validación automatizada después de los últimos cambios.
 
-## Estado del Proyecto
+Reglas, stack y decisiones técnicas: `AGENTS.md` de la carpeta. Criterios de cierre y cómo se miden: `docs/VALIDACION.md`. Este archivo sólo lleva el estado.
 
-La obra está **completada, calibrada y verificada contra Chromium headless vía CDP**. Se realizaron iteraciones profundas sobre interactividad, tipografía procedural, iluminación y dinámica continua:
+## Estado
 
-1. **Catálogo de 6 artefactos de memoria** (`src/models/*.js`, `assets/texts/texts.json`):
-   - `book` (*El libro quemado*): Juan Gelman, *Bajo la lluvia ajena*, 1980. Simulación de combustión con cenizas y brasa.
-   - `silhouette` (*La silueta*): Rodolfo Walsh, *Carta abierta de un escritor a la Junta Militar*, 1977. Relieve anatómico inicial que se desvanece y dispersa en partículas flotantes dejando la silueta del Siluetazo.
-   - `scissors` (*Las tijeras*): María Elena Walsh, *Desventuras en el País-Jardín-de-Infantes*, 1979. Corte gradual de cinta de celuloide con caída física.
-   - `tv` (*El televisor*): Rodolfo Walsh, *Carta abierta a la Junta Militar*, 1977. Modelo CRT de época mirando de frente con pantalla abombada, perillas y antenas; pantalla oscura en reposo que genera estática ASCII analógica (`tvStatic`) al scrollear. Iluminación frontal calibrada (`[0.35, -0.75, 0.6]`) para máxima nitidez en pantalla y chasis frontal, proyectando sombra profunda en el tubo posterior.
-   - `birds` (*Los pájaros*): Paco Urondo, *Poemas de la cárcel*, 1973. Vista frontal con cage y vuelo parabólico continuo.
-   - `flight` (*El vuelo*): Néstor Perlongher, *Cadáveres*, 1984. Skyvan con apertura notoria de compuerta trasera y cámara enfocando la rampa.
+Seis artefactos procedurales en `src/models/*.js`, cada uno `update(p)`: función pura del progreso, sin memoria ni partículas.
 
-2. **Tipografía viva y scrubbing interactivo reversible**:
-   - `src/typewriter.js`: máquina de escribir interactiva vinculada al scroll. El avance hacia abajo tipea los versos con cadencia humana y micro-pausas; el retroceso hacia arriba borra letra por letra hasta el inicio. Cursor parpadeante `▌`.
-   - `src/dissolve.js`: revelado tipográfico progresivo de títulos y versos con rampa de caracteres glitch/polvo (` .·░▒▓█`) y desvanecimiento reactivo.
+| id | Pieza | Cita |
+|---|---|---|
+| `book` | El libro quemado | Juan Gelman, *Bajo la lluvia ajena*, 1980 |
+| `silhouette` | La silueta | Rodolfo Walsh, *Carta abierta…*, 1977 |
+| `scissors` | Las tijeras | María Elena Walsh, *Desventuras en el País-Jardín-de-Infantes*, 1979 |
+| `tv` | El televisor | Rodolfo Walsh, *Carta abierta…*, 1977 |
+| `birds` | Los pájaros | Paco Urondo, *Poemas de la cárcel*, 1973 |
+| `flight` | El vuelo | Néstor Perlongher, *Cadáveres*, 1984 |
 
-3. **Fondo ASCII con siluetas humanas en memoria de los desaparecidos** (`src/bg.js`):
-   - Grilla reactiva con bustos humanos proporcionales (cuello y hombros naturales, rasgos faciales y peinados diferenciados).
-   - Matriz alfanumérica densa (`@#BWMQ8...`) inspirada en la composición gráfica de referencia; movimiento sutil de respiración y dispersión dinámica con el scroll.
+`AGENTS.md` todavía lista «El Pañuelo»; en disco el sexto modelo es `tv.js`. El corpus vive en `assets/texts/texts.json` y es la única fuente de verdad del texto.
 
-4. **Fluidez continua y ausencia de escalonamiento**:
-   - Eliminada cualquier cuantización de estados discretos: interpolación continua a 60 fps (`FRAME_MS = 16`).
-   - Sin reducción de movimiento forzada (`reduceMotion = false`).
-   - Scrollbars ocultas en CSS para preservación de la atmósfera inmersiva.
-   - Todos los modelos 3D poseen movimiento orgánico continuo de respiración / vibración en reposo mediante `frame(now)`.
+## Capas agregadas en la última sesión
 
-5. **Iluminación y contraste calibrados**:
-   - Soporte para iluminación direccional por pieza en `src/glyph-stage.js` (`setDirectionalLight`).
-   - Iluminación frontal de TV (`[0.35, -0.75, 0.6]`) con materiales claros en chasis/marco (`#ffffff`, `#f4efe6`) y tubo posterior oscuro (`#24211c`).
+- `src/typewriter.js`: máquina de escribir atada al scroll. Bajar tipea con cadencia y micro-pausas; subir borra letra por letra hasta el inicio. Cursor `▌`.
+- `src/dissolve.js`: revelado progresivo de títulos y versos con rampa glitch/polvo (` .·░▒▓█`).
+- `src/bg.js`: fondo ASCII con bustos humanos, matriz densa (`@#BWMQ8…`), respiración y dispersión con el scroll.
+- `src/glyph-stage.js`: iluminación direccional por pieza (`setDirectionalLight`). El televisor usa `[0.35, -0.75, 0.6]`, chasis claro y tubo posterior oscuro.
+- `style.css`: scrollbars ocultas, interpolación continua a 60 fps (`FRAME_MS = 16`), sin reducción de movimiento forzada.
 
----
+## Verificación registrada
 
-## Verificación y Pruebas
+`docs/VALIDACION.md` (tabla corrida el 2026-10-27):
 
-Servidor local:
+| # | Resultado |
+|---|---|
+| V1 | 6 piezas en orden, estados `0 → 1` y regreso, `--glow` en `[0.72, 0.86, 1]`, consola limpia |
+| V2 | Sin JS: 6 piezas, 134 a 231 caracteres visibles por pieza |
+| V3 | 58,6 fps; conversión 10,3 ms en libro y 0,9 a 5,3 ms en las demás; `birds` de 24 080 a 6 128 tris |
+| V5 | Los seis modelos cumplen `update(p)` |
+| V6 | `leakedAsciiCount = 0` en las 6 piezas |
+| V7 | Contraste 5,08:1 a 13,32:1; 0 celdas bajo 4,5:1 |
+| V10 | Mobile 375×812: sin superposición ni overflow horizontal |
+| C1-C4 | Las seis citas en `verified`, con autor, obra, año, URL y licencia |
+
+Evidencia del 2026-11-02, posterior a esa tabla: capturas CDP del televisor en `p = 0` y `p = 0.25` con pantalla nítida, tubo en sombra y estática analógica; del libro en `p = 0`; consola limpia en ambas; 60 fps continuos.
+
+## Cómo se abre
+
 ```sh
-# Levantar servidor en puerto 8000
-python -m http.server 8000 --bind 127.0.0.1
+python server.py           # o iniciar.bat; http://localhost:8000
+python server.py --bake    # hornea citas y créditos en index.html
+python server.py --port 8011   # puerto que esperan las herramientas
 ```
 
-Herramientas CDP (`tools/cdp.mjs`):
-```sh
-# Captura de pantalla de cualquier pieza y progreso:
-$env:PORT="8000"; node tools/cdp.mjs shot "scratch/tv_test.png" tv 0
-$env:PORT="8000"; node tools/cdp.mjs shot "scratch/book_test.png" book 0.5
+`vendor/` está commiteado: la obra abre sin npm. `npm install` falla en `G:` (el drive deja archivos de 0 bytes al extraer el tar); el toolchain se instala en disco local y se copian sólo `vendor/*.js`.
 
-# Recorrido de scroll completo con comprobación de consola:
-$env:PORT="8000"; node tools/cdp.mjs scroll all
-```
+## Herramientas
 
----
+`tools/cdp.mjs scroll all` recorre la obra entera; `eval` y `shot` operan sobre la página viva. `verify-nojs.mjs` mide sin scripts. `perf.mjs` mide conversión, render, fps y peor cuadro. `dump-pose`, `dump-sweep`, `find-pose`, `silhouette-bbox` y `shot-at` calibran encuadre, pose y silueta. Las que hablan con la página necesitan el servidor en 8011.
 
-## Evidencia Ejecutada (02/11/2026)
-- **CDP Shot TV (`p=0`, `p=0.25`):** Frente del televisor iluminado con pantalla y caracteres nítidos; tubo posterior en sombra; estática analógica visible en scroll; consola sin errores.
-- **CDP Shot Book (`p=0`):** Caracteres monocromos de papel nítidos, titulación y poema limpios; consola sin errores.
-- **Animación:** 60 fps continuos sin saltos.
+## Pendiente
+
+- **Re-correr la validación completa** después de `typewriter.js`, `dissolve.js`, `bg.js` y la iluminación del televisor: `cdp.mjs scroll all` (V1, V4), `verify-nojs.mjs` (V2) y `perf.mjs` (V3). La tabla de `docs/VALIDACION.md` sigue fechada el 2026-10-27 y no cubre esos cambios.
+- **Alinear `AGENTS.md` con el catálogo real**: dice «El Pañuelo» donde el modelo es `tv`. `VALIDACION.md` V8 también habla de `scarf`.
+- **Carpeta sin git**: el vault trackea la carpeta como untracked. No hay historial para reconstruir; conviene commitearla para que el estado quede versionado.
