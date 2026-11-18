@@ -11,7 +11,7 @@ nav:
 # arte/fact0s
 
 ## Secciones y Carpetas
-- [[02 - Áreas/Universidad/Licenciatura en Artes Electrónicas/2026 2° Tecnologías Hipermediales/TP - Final/02 - Artefactos de memoria/docs/INDEX|docs]]
+- [[02 - Áreas/Universidad/Licenciatura en Artes Electrónicas/2026 2° Tecnologías Hipermediales/TP Final/arte-fact0s/docs/INDEX|docs]]
 
 ## Contenidos y Notas
 - [[AGENTS]]
