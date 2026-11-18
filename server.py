@@ -115,7 +115,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def end_headers(self):
-        self.send_header('Cache-Control', 'no-store')
+        path = urllib.parse.urlparse(self.path).path
+        if path.startswith('/vendor/') or path.startswith('/assets/fonts/'):
+            self.send_header('Cache-Control', 'public, max-age=31536000, immutable')
+        else:
+            self.send_header('Cache-Control', 'no-store')
         super().end_headers()
 
     def do_GET(self):
