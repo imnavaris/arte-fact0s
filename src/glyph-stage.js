@@ -178,6 +178,7 @@ export class GlyphStage {
       this.disperseCells(grid);
     }
     this.burnCells(grid);
+    if (this.burn > 0.5) this.windAsh(grid);
   }
   disperseCells(grid) {
     const s = this.scatter;
@@ -309,6 +310,64 @@ export class GlyphStage {
           if (grid.color) grid.color[i] = "#9e9484";
         }
       }
+    }
+  }
+  windAsh(grid) {
+    const e = this.extent;
+    if (!e || !this.colTop) return;
+    const { cols, rows } = grid;
+    const n = cols * rows;
+    if (!this._wIdx || this._wIdx.length < n) {
+      this._wIdx = new Int32Array(n);
+      this._wCh = new Array(n);
+      this._wCo = new Array(n);
+    }
+    const w = Math.min(1, (this.burn - 0.5) / 0.5);
+    const h = this.heat;
+    const occ = this.occ;
+    const idx = this._wIdx;
+    const chs = this._wCh;
+    const cos = this._wCo;
+    let cnt = 0;
+    for (let c = e.minC; c <= e.maxC; c++) {
+      const topR = this.colTop[c];
+      const botR = this.colBot[c];
+      if (botR < topR) continue;
+      const midC = (e.minC + e.maxC) * 0.5;
+      const halfW = Math.max(1, (e.maxC - e.minC) * 0.5);
+      const relX = Math.min(1, Math.abs(c - midC) / halfW);
+      const colBurn = Math.max(0, Math.min(1, this.burn * 1.35 - (1 - relX) * 0.36));
+      if (colBurn <= 0.01) continue;
+      const colH = Math.max(1, botR - topR);
+      const frontR = Math.min(botR, topR + Math.round(colBurn * colH));
+      for (let r = Math.max(0, topR - 3); r <= frontR - 6; r++) {
+        const i = r * cols + c;
+        if (!occ[i] || h[i] >= 3) continue;
+        if (grid.color[i] === '#d99b26' || grid.char[i] === ' ') continue;
+        const h1 = (hash(r, c) % 1000) / 1000;
+        const h3 = (hash(r + 31, c + 3) % 1000) / 1000;
+        idx[cnt] = i;
+        chs[cnt] = h3 < w * 0.75 ? null : grid.char[i];
+        cos[cnt] = grid.color[i];
+        cnt++;
+        grid.char[i] = ' ';
+      }
+    }
+    for (let k = 0; k < cnt; k++) {
+      const ch = chs[k];
+      if (ch == null) continue;
+      const i = idx[k];
+      const r = (i / cols) | 0;
+      const c = i % cols;
+      const h1 = (hash(r, c) % 1000) / 1000;
+      const h2 = (hash(c + 7, r + 13) % 1000) / 1000;
+      const nr = r - Math.round(w * (1 + 5 * h2));
+      const nc = c + Math.round(w * (4 + 9 * h1));
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      const j = nr * cols + nc;
+      if (grid.char[j] !== ' ') continue;
+      grid.char[j] = ch;
+      if (grid.color) grid.color[j] = cos[k];
     }
   }
   setPolygons(polygons, render = true) {

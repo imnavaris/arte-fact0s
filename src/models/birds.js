@@ -63,27 +63,27 @@ export function createBirds(){
   let curP=0, curT=0;
   function applyState(){
     const p=curP;
-    const open=sm(.04,.45,p);
-    const brk=sm(.5,.8,p);
-    const exit=sm(.8,.97,p);
+    const open=sm(.05,.4,p);
+    const brk=sm(.42,.72,p);
+    const exit=sm(.74,.96,p);
+    const fall=brk*brk;
     cage.visible=exit<1;
-    cage.position.y=-exit*8;
-    cage.rotation.y=Math.sin(p*Math.PI*.6)*.18*(1-brk);
+    cage.position.y=-exit*9;
+    cage.rotation.y=open*.25*(1-brk);
     bars.forEach(({g,tan,bx,bz,rx,rz})=>{
-      const stagger=sm(0,.45,p);
-      g.quaternion.setFromAxisAngle(tan,-(stagger*1.35+brk*1.8));
-      g.position.set(bx+rx*brk*2.4,-1.45-brk*brk*4.5,bz+rz*brk*2.4);
+      g.quaternion.setFromAxisAngle(tan,-(open*1.7+brk*2.2));
+      g.position.set(bx+rx*(open*.6+fall*3.2),-1.45+open*.3-fall*5.5,bz+rz*(open*.6+fall*3.2));
     });
     rings.visible=exit<1;
-    rings.position.y=-brk*brk*6;
-    rings.rotation.x=brk*1.2;
-    rings.scale.set(1+open*.45,1-open*.15,1+open*.45);
+    rings.position.y=open*1.6-fall*7;
+    rings.rotation.x=brk*1.4;
+    rings.scale.set(1+open*.5,1,1+open*.5);
     crown.visible=exit<1;
-    crown.position.y=1.95-brk*brk*8;
-    crown.rotation.z=brk*3;
+    crown.position.y=1.95+open*1.4-brk*(1-brk)*4-fall*9;
+    crown.rotation.z=brk*2.5;
     hook.visible=exit<1;
-    hook.position.y=2.22-brk*brk*8;
-    hook.rotation.z=-brk*4;
+    hook.position.y=2.22+open*1.8-brk*(1-brk)*4-fall*9;
+    hook.rotation.z=-brk*3;
     birds.forEach(({b,wings,a,dirX,start},i)=>{
       const ti=.05+.36*rnd(i,2);
       const s=sm(ti,.98,p);
