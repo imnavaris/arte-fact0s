@@ -16,6 +16,8 @@ export function createBook(){
   },{roughness:.6,metalness:.08});
 
   const brassMat=mat('#dfd8c8',{roughness:.3,metalness:.4});
+  const ribMat=mat('#d99b26',{roughness:.5,metalness:.15});
+  ribMat.userData.fixedColor='#d99b26';
   const spineMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
    g.addColorStop(0,'#b07a1e');g.addColorStop(.5,'#d99b26');g.addColorStop(1,'#b07a1e');
@@ -23,6 +25,7 @@ export function createBook(){
    c.fillStyle='#f5f0e4';
    for(const y of [.14,.32,.5,.68,.86])c.fillRect(0,y*h-4,w,8);
   },{roughness:.55,metalness:.1});
+  spineMat.userData.fixedColor='#d99b26';
 
   const pageBlockMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
@@ -82,13 +85,13 @@ export function createBook(){
   const pages=[];
 
   
-  const spineGeo=new T.CylinderGeometry(.24,.24,2.14,22,1,false,Math.PI*.48,Math.PI*1.04);
+  const spineGeo=new T.CylinderGeometry(.30,.30,2.14,22,1,false,Math.PI*.48,Math.PI*1.04);
   spineGeo.rotateX(Math.PI/2);
-  part(root,spineGeo,spineMat,[0,-.42,0]);
+  part(root,spineGeo,spineMat,[0,-.28,0]);
   for(const z of [-.82,-.41,0,.41,.82]){
-   const rib=new T.CylinderGeometry(.265,.265,.075,18,1,false,Math.PI*.46,Math.PI*1.08);
+   const rib=new T.CylinderGeometry(.295,.295,.075,18,1,false,Math.PI*.46,Math.PI*1.08);
    rib.rotateX(Math.PI/2);
-   part(root,rib,brassMat,[0,-.42,z]);
+   part(root,rib,ribMat,[0,-.28,z]);
   }
 
   

@@ -50,7 +50,7 @@ export function createBirds(){
     g.position.set(x*1.58,-1.45,z*1.58);
     cage.add(g);
     tube(g,[[0,0,0],[0,1.95,0],[-x*.45,2.72,-z*.45],[-x*1.12,3.22,-z*1.12],[-x*1.58,3.40,-z*1.58]],.046,cageBarMat,16,6);
-    bars.push({g,tan:new T.Vector3(-z,0,x)});
+    bars.push({g,tan:new T.Vector3(-z,0,x),bx:x*1.58,bz:z*1.58,rx:x,rz:z,spin:i%2?1:-1});
   }
   const rings=new T.Group();
   cage.add(rings);
@@ -63,19 +63,27 @@ export function createBirds(){
   let curP=0, curT=0;
   function applyState(){
     const p=curP;
-    const open=sm(.04,.58,p);
-    const exit=sm(.6,.95,p);
+    const open=sm(.04,.45,p);
+    const brk=sm(.5,.8,p);
+    const exit=sm(.8,.97,p);
     cage.visible=exit<1;
     cage.position.y=-exit*8;
-    cage.rotation.y=(Math.sin(p*Math.PI*.6)*.18+Math.sin(curT*1.2)*.03)*(1-exit);
-    bars.forEach(({g,tan},idx)=>{
-      const stagger=sm(idx*0.015,0.52+idx*0.015,p);
-      g.quaternion.setFromAxisAngle(tan,-stagger*1.35);
+    cage.rotation.y=Math.sin(p*Math.PI*.6)*.18*(1-brk);
+    bars.forEach(({g,tan,bx,bz,rx,rz})=>{
+      const stagger=sm(0,.45,p);
+      g.quaternion.setFromAxisAngle(tan,-(stagger*1.35+brk*1.8));
+      g.position.set(bx+rx*brk*2.4,-1.45-brk*brk*4.5,bz+rz*brk*2.4);
     });
-    rings.visible=open<.78;
+    rings.visible=exit<1;
+    rings.position.y=-brk*brk*6;
+    rings.rotation.x=brk*1.2;
     rings.scale.set(1+open*.45,1-open*.15,1+open*.45);
-    crown.visible=open<.62;
-    hook.visible=open<.62;
+    crown.visible=exit<1;
+    crown.position.y=1.95-brk*brk*8;
+    crown.rotation.z=brk*3;
+    hook.visible=exit<1;
+    hook.position.y=2.22-brk*brk*8;
+    hook.rotation.z=-brk*4;
     birds.forEach(({b,wings,a,dirX,start},i)=>{
       const ti=.05+.36*rnd(i,2);
       const s=sm(ti,.98,p);
