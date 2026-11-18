@@ -1,16 +1,16 @@
-// Conduce Chromium por CDP (DevTools Protocol) para verificar la obra con
-// scroll real, rAF real y capturas. Node 24 trae WebSocket global: no hace
-// falta ningun paquete.
-//   node tools/cdp.mjs <orden> [...args]
-//
-//   ordenes:
-//     scroll <pieza?>|all   recorre el scroll y deja un informe en stdout
-//     shot  <salida.png>    captura la ventana
-//     eval  <expr>         evalua una expresion en la pagina
+
+
+
+
+
+
+
+
+
 import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const DEBUG_PORT = 9333;
 
@@ -31,17 +31,18 @@ const chrome = spawn(CHROME, [
 
 process.on('exit', () => chrome.kill());
 
-// Espera a que el puerto de depuracion responda.
+
 let wsUrl = null;
+let lastErr = null;
 for (let i = 0; i < 60 && !wsUrl; i++) {
   await sleep(250);
   try {
     const res = await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`);
     const json = await res.json();
     wsUrl = json.webSocketDebuggerUrl;
-  } catch { /* todavia no */ }
+  } catch (e) { lastErr = e; }
 }
-if (!wsUrl) { console.error('no se pudo hablar con Chromium'); process.exit(1); }
+if (!wsUrl) { console.error('sin respuesta del puerto de depuracion', DEBUG_PORT, String((lastErr && lastErr.message) || lastErr || '')); process.exit(1); }
 
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
@@ -68,7 +69,7 @@ function send(method, params = {}, sessionId) {
   });
 }
 
-// Crea una pestana y se conecta a ella.
+
 const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
 const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
 sessions.set(targetId, sessionId);
@@ -78,11 +79,11 @@ await call('Page.enable');
 await call('Runtime.enable');
 await call('Log.enable');
 await call('Network.enable');
-// El perfil es persistente: sin esto Chromium puede servir un modulo viejo
-// del cache y la verificacion mide una version que no esta en disco.
+
+
 await call('Network.setCacheDisabled', { cacheDisabled: true });
-// El headless reporta movimiento reducido: la obra cuantiza el estado en
-// cuatro escalones y la verificacion no mide el camino que ve la gente.
+
+
 await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
 
 const consoleLines = [];
@@ -110,9 +111,10 @@ async function evaluate(expr) {
 async function goto(url) {
   await call('Page.navigate', { url });
   await sleep(2500);
-  // El perfil es persistente: el navegador restaura el scroll de la sesion
-  // anterior y la captura sale del final de la obra.
+  
+  
   await evaluate("history.scrollRestoration='manual'; scrollTo(0,0); 1");
+await evaluate(`(async () => { const L = document.getElementById('loader'); if (!L || L.classList.contains('done')) return 'skip'; const t0 = Date.now(); let b = null; while (Date.now() - t0 < 25000) { b = document.getElementById('enter'); if (b && !b.disabled) break; await new Promise((r) => setTimeout(r, 150)); } if (b && !b.disabled) { b.click(); return 'entered'; } return 'timeout'; })()`);
 }
 
 if (order === 'scroll') {
@@ -131,7 +133,7 @@ if (order === 'scroll') {
       scrollTo(0, y);
       await sleep(200);
       const active = document.querySelector('.piece.is-active');
-      const sec = active ? window.__artefactos.sections.find((s) => s.id === active.dataset.piece) : null;
+      const sec = active ? window.__artefact0s.sections.find((s) => s.id === active.dataset.piece) : null;
       const pre = document.querySelector('.glyph-output');
       rows.push({
         y: Math.round(scrollY),
@@ -147,7 +149,7 @@ if (order === 'scroll') {
   console.log(JSON.stringify(report, null, 1));
   console.log('CONSOLA:', consoleLines.length ? consoleLines.join('\n') : 'limpia');
 } else if (order === 'shot') {
-  //   shot <salida.png> [pieza] [p] [rx] [ry]
+  
   const piece = args[1] || '';
   const p = args[2] || '';
   const rx = args[3] || '';
@@ -158,11 +160,11 @@ if (order === 'scroll') {
   if (rx !== '') params.push(`rx=${rx}`);
   if (ry !== '') params.push(`ry=${ry}`);
   await goto(`http://127.0.0.1:${PORT}/${params.length ? '?' + params.join('&') : ''}`);
-  // Se espera a que la escena tenga glifos: capturar antes muestra el
-  // calentamiento, con la trama sin inscripcion.
+  
+  
   await evaluate("new Promise(r => { const t0 = Date.now(); const t = setInterval(() => { const o = document.querySelector('.glyph-output'); if ((o && o.textContent.trim().length > 200) || Date.now() - t0 > 8000) { clearInterval(t); r(1); } }, 100); })");
   await sleep(600);
-  const state = await evaluate("[scrollY, window.__artefactos.stage.lines, document.querySelector('.glyph-output').textContent.replace(/\\s/g,'').slice(0,60), window.__artefactos.stage.burn, window.__artefactos.stage.extent, window.__artefactos.sections.map(s=>+s.state.toFixed(2)), window.__artefactos.models.get('book').burn(0.5)]");
+  const state = await evaluate("[scrollY, window.__artefact0s.stage.lines, document.querySelector('.glyph-output').textContent.replace(/\\s/g,'').slice(0,60), window.__artefact0s.stage.burn, window.__artefact0s.stage.extent, window.__artefact0s.sections.map(s=>+s.state.toFixed(2)), window.__artefact0s.models.get('book').burn(0.5)]");
   console.log('ESTADO:', JSON.stringify(state));
   const { data } = await call('Page.captureScreenshot', { format: 'png' });
   writeFileSync(args[0], Buffer.from(data, 'base64'));

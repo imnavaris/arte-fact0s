@@ -1,9 +1,9 @@
-// Barrido de poses para encuadrar una pieza.
-//   node tools/dump-sweep.mjs <pieza> "<rx,ry> <rx,ry> ..." [p]
-// Imprime la silueta compacta de cada pose para elegir la mejor.
+
+
+
 import { execFileSync } from 'node:child_process';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 
 const [piece = 'book', poseList = '0,0', p = '0'] = process.argv.slice(2);
@@ -21,7 +21,7 @@ for (const pose of poseList.split(/\s+/).filter(Boolean)) {
       '--dump-dom', url,
     ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
   } catch (e) {
-    console.log(`# ${piece} rx=${rx} ry=${ry} -> ERROR`);
+    console.log(`# ${piece} rx=${rx} ry=${ry} -> ERROR ${String((e && e.message) || e)}`);
     continue;
   }
 

@@ -1,11 +1,11 @@
-// Captura el escenario con y sin smoothShading, para comparar el costo de
-// sombreado contra lo que se ve.
-//   node tools/compare-shade.mjs <pieza> <salida.png>
+
+
+
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const DEBUG_PORT = 9335;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -24,10 +24,12 @@ const chrome = spawn(CHROME, [
 process.on('exit', () => chrome.kill());
 
 let wsUrl = null;
+let lastErr = null;
 for (let i = 0; i < 60 && !wsUrl; i++) {
   await sleep(250);
-  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch { /* */ }
+  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch (e) { lastErr = e; }
 }
+if (!wsUrl) { console.error('sin respuesta del puerto de depuracion', DEBUG_PORT, String((lastErr && lastErr.message) || lastErr || '')); process.exit(1); }
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
@@ -62,7 +64,7 @@ async function shot(name) {
 }
 
 await call('Runtime.evaluate', { expression: `(() => {
-  const h = window.__artefactos.stage.handle;
+  const h = window.__artefact0s.stage.handle;
   h.setOptions({ ...h.getOptions(), smoothShading: false });
   h.rerender();
 })()` });
@@ -70,7 +72,7 @@ await sleep(600);
 await shot(outFile.replace(/\.png$/, '-sin-sombreado.png'));
 
 await call('Runtime.evaluate', { expression: `(() => {
-  const h = window.__artefactos.stage.handle;
+  const h = window.__artefact0s.stage.handle;
   h.setOptions({ ...h.getOptions(), smoothShading: true });
   h.rerender();
 })()` });

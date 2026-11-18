@@ -1,9 +1,9 @@
-// Verifica la obra sin JavaScript: las secciones deben apilarse como
-// documento y el texto debe seguir siendo legible.
-//   node tools/verify-nojs.mjs
+
+
+
 import { spawn } from 'node:child_process';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const DEBUG_PORT = 9338;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -17,10 +17,12 @@ const chrome = spawn(CHROME, [
 process.on('exit', () => chrome.kill());
 
 let wsUrl = null;
+let lastErr = null;
 for (let i = 0; i < 60 && !wsUrl; i++) {
   await sleep(250);
-  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch { /* */ }
+  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch (e) { lastErr = e; }
 }
+if (!wsUrl) { console.error('sin respuesta del puerto de depuracion', DEBUG_PORT, String((lastErr && lastErr.message) || lastErr || '')); process.exit(1); }
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 

@@ -1,5 +1,5 @@
-// Reporta la caja envolvente de la silueta y la grilla resuelta.
-//   node tools/silhouette-bbox.mjs <salida.html>
+
+
 import { readFileSync } from 'node:fs';
 
 const dom = readFileSync(process.argv[2], 'utf8');

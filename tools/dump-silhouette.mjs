@@ -1,7 +1,7 @@
-// Vuelca la silueta de la escena ASCII a texto plano, para encuadrar las piezas.
-//   node tools/dump-silhouette.mjs <salida.html> [paso]
-// El <pre> del DOM lleva \r al final de cada fila: hay que sacarlo o aparece
-// una columna fantasma en el borde derecho.
+
+
+
+
 import { readFileSync } from 'node:fs';
 
 const file = process.argv[2];

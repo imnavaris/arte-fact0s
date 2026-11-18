@@ -1,17 +1,17 @@
-// Vuelca la silueta de cada pieza a texto plano, para encuadrar las seis.
-//   node tools/dump-all.mjs <carpeta-salida> [p] [ancho] [alto]
-// Usa Chromium headless de Playwright (no requiere npm en el proyecto).
+
+
+
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const outDir = process.argv[2] || '.';
 const p = process.argv[3] ?? '0';
 const width = process.argv[4] || '1440';
 const height = process.argv[5] || '900';
-const pieces = ['book', 'scarf', 'silhouette', 'scissors', 'birds', 'flight'];
+const pieces = ['book', 'silhouette', 'scissors', 'tv', 'birds', 'flight'];
 
 mkdirSync(outDir, { recursive: true });
 

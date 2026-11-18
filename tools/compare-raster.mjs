@@ -1,10 +1,10 @@
-// Compara opciones de raster de glyphcss en imagen y en costo.
-//   node tools/compare-raster.mjs <pieza> <carpeta-salida>
+
+
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const DEBUG_PORT = 9336;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -23,10 +23,12 @@ const chrome = spawn(CHROME, [
 process.on('exit', () => chrome.kill());
 
 let wsUrl = null;
+let lastErr = null;
 for (let i = 0; i < 60 && !wsUrl; i++) {
   await sleep(250);
-  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch { /* */ }
+  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch (e) { lastErr = e; }
 }
+if (!wsUrl) { console.error('sin respuesta del puerto de depuracion', DEBUG_PORT, String((lastErr && lastErr.message) || lastErr || '')); process.exit(1); }
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
@@ -64,7 +66,7 @@ const variants = [
 
 const timing = await call('Runtime.evaluate', {
   expression: `(() => {
-    const h = window.__artefactos.stage.handle;
+    const h = window.__artefact0s.stage.handle;
     const base = h.getOptions();
     const out = {};
     const bench = (o) => {
@@ -85,7 +87,7 @@ console.log('render ms:', JSON.stringify(timing.result.value));
 for (const v of variants) {
   await call('Runtime.evaluate', {
     expression: `(() => {
-      const h = window.__artefactos.stage.handle;
+      const h = window.__artefact0s.stage.handle;
       h.setOptions({ ...h.getOptions(), ...${JSON.stringify(v.opts)} });
       h.rerender();
     })()`,

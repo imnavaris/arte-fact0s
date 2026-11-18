@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""Servidor local estatico para la obra. Python stdlib only.
-
-El corpus vive en assets/texts/texts.json y es la unica fuente de verdad.
-El servidor inyecta sus citas en el documento: sin JavaScript, el texto de
-las seis piezas sigue en el DOM, como pide el diseno.
-"""
 import http.server
 import json
 from pathlib import Path
@@ -32,7 +26,6 @@ def linkify_urls(text):
     if not text:
         return ''
     escaped = html.escape(text)
-    # Replace URLs with hyperlinks
     def repl(m):
         url = m.group(0)
         return f'<a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a>'
@@ -40,7 +33,6 @@ def linkify_urls(text):
 
 
 def build_citations():
-    """Arma el HTML de las seis citas a partir del corpus."""
     data = json.loads(CORPUS.read_text(encoding='utf-8'))
     blocks = []
     for text in data['texts']:
@@ -74,7 +66,6 @@ def build_citations():
 
 
 def build_credits():
-    """Arma el bloque de creditos con la procedencia de cada cita."""
     data = json.loads(CORPUS.read_text(encoding='utf-8'))
     blocks = []
     for text in data['texts']:
@@ -106,7 +97,6 @@ def inject_corpus(doc_html):
     citations_html = f'{CITAS_START}\n{build_citations()}\n{CITAS_END}'
     credits_html = f'{CREDITOS_START}\n{build_credits()}\n{CREDITOS_END}'
 
-    # Replace old markers or blocks
     if CITAS_START in doc_html and CITAS_END in doc_html:
         doc_html = re.sub(r'<!--CITAS:START-->.*?<!--CITAS:END-->', citations_html, doc_html, flags=re.DOTALL)
     elif '<!--CITAS-->' in doc_html:

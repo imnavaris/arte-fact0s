@@ -1,10 +1,10 @@
-// Captura la obra en una posicion de scroll concreta.
-//   node tools/shot-at.mjs <salida.png> <scrollY>
+
+
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 const DEBUG_PORT = 9337;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -23,10 +23,12 @@ const chrome = spawn(CHROME, [
 process.on('exit', () => chrome.kill());
 
 let wsUrl = null;
+let lastErr = null;
 for (let i = 0; i < 60 && !wsUrl; i++) {
   await sleep(250);
-  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch { /* */ }
+  try { wsUrl = (await (await fetch(`http://127.0.0.1:${DEBUG_PORT}/json/version`)).json()).webSocketDebuggerUrl; } catch (e) { lastErr = e; }
 }
+if (!wsUrl) { console.error('sin respuesta del puerto de depuracion', DEBUG_PORT, String((lastErr && lastErr.message) || lastErr || '')); process.exit(1); }
 const ws = new WebSocket(wsUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 
@@ -52,6 +54,7 @@ const call = (m, p) => send(m, p, sessionId);
 await call('Page.enable');
 await call('Runtime.enable');
 await call('Page.navigate', { url: `http://127.0.0.1:${PORT}/` });
+await call('Runtime.evaluate', { expression: `(async () => { const L = document.getElementById('loader'); if (!L || L.classList.contains('done')) return 'skip'; const t0 = Date.now(); let b = null; while (Date.now() - t0 < 25000) { b = document.getElementById('enter'); if (b && !b.disabled) break; await new Promise((r) => setTimeout(r, 150)); } if (b && !b.disabled) { b.click(); return 'entered'; } return 'timeout'; })()`, awaitPromise: true, returnByValue: true });
 await sleep(3000);
 
 await call('Runtime.evaluate', { expression: `scrollTo(0, ${Number(y)})` });

@@ -1,9 +1,9 @@
-// Busca la pose en que una pieza se lee mejor: puntua la silueta por
-// bifurcacion (cuantas filas se parten en dos lóbulos) y por aspecto.
-//   node tools/find-pose.mjs <pieza> [p]
+
+
+
 import { execFileSync } from 'node:child_process';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 
 const [piece = 'book', p = '0'] = process.argv.slice(2);
@@ -14,6 +14,7 @@ const rys = [];
 for (let ry = -60; ry <= 120; ry += 30) rys.push(ry);
 
 const results = [];
+const failures = [];
 for (const rx of rxs) {
   for (const ry of rys) {
     const url = `http://127.0.0.1:${PORT}/?piece=${piece}&rx=${rx}&ry=${ry}&p=${p}`;
@@ -26,7 +27,7 @@ for (const rx of rxs) {
         '--virtual-time-budget=5000',
         '--dump-dom', url,
       ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
-    } catch { continue; }
+    } catch (e) { failures.push(`rx=${rx} ry=${ry}: ${String((e && e.message) || e)}`); continue; }
 
     const at = html.indexOf('class="glyph-output"');
     if (at < 0) continue;
@@ -55,8 +56,8 @@ for (const rx of rxs) {
     });
     if (!runs.length) continue;
 
-    // Filas con dos lóbulos separados: es lo que hace que un libro se lea
-    // como libro (dos tapas con el lomo al medio) y no como una masa.
+    
+    
     const perRow = new Map();
     for (const run of runs) perRow.set(run.r, (perRow.get(run.r) || 0) + 1);
     const split = [...perRow.values()].filter((n) => n >= 2).length;
@@ -68,6 +69,7 @@ for (const rx of rxs) {
 }
 
 results.sort((a, b) => (b.split - a.split) || (b.fill - a.fill));
+for (const f of failures) console.log('FALLO', f);
 for (const r of results.slice(0, 20)) {
   console.log(`rx=${String(r.rx).padStart(3)} ry=${String(r.ry).padStart(4)} | ${r.w}x${r.h} | filas partidas ${r.split} | relleno ${r.fill}`);
 }

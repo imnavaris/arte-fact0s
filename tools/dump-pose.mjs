@@ -1,9 +1,9 @@
-// Vuelca la silueta de una pieza con una pose concreta.
-//   node tools/dump-pose.mjs <pieza> <rx> <ry> [p] [zoom]
-// Sirve para encuadrar: se prueba una pose y se lee la silueta como imagen.
+
+
+
 import { execFileSync } from 'node:child_process';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 
 const [piece = 'book', rx = '46', ry = '-14', p = '0'] = process.argv.slice(2);

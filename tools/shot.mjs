@@ -1,9 +1,9 @@
-// Captura el escenario ASCII de una pieza como PNG, para leer la obra como
-// se ve y no como mascara de hashes.
-//   node tools/shot.mjs <pieza> <salida.png> [rx] [ry] [p] [ancho] [alto]
+
+
+
 import { execFileSync } from 'node:child_process';
 
-const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\ms-playwright\\chromium-1248\\chrome-win64\\chrome.exe';
+const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8011';
 
 const [piece = 'book', out = 'shot.png', rx = '', ry = '', p = '0', width = '1440', height = '900'] = process.argv.slice(2);
