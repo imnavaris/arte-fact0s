@@ -2,7 +2,7 @@
 type: registro
 ---
 
-# Artefactos de memoria
+# arte/fact0s
 
 Obra interactiva de net art y tipografía 3D que reconstruye seis objetos emblemáticos de la última dictadura cívico-militar argentina vinculados a textos literarios y testimoniales del período.
 

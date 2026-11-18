@@ -1,4 +1,4 @@
-# Artefact0s
+# arte/fact0s
 
 Una experiencia web interactiva y narrativa de lectura sobre la última dictadura cívico-militar argentina. 
 
