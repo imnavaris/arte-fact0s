@@ -23,7 +23,7 @@ const POSES = {
  book: { rotX: 70, rotY: 90, zoom: 120 },
  silhouette: { rotX: 80, rotY: 90, zoom: 120 },
  scissors: { rotX: 60, rotY: 30, zoom: 120 },
- tv: { rotX: 90, rotY: 270, zoom: 120 }, // la pantalla mira hacia -Z del mundo: la camara la ve de frente desde 270
+ tv: { rotX: 90, rotY: 270, zoom: 120 }, 
  birds: { rotX: 86, rotY: 90, zoom: 120 },
  flight: { rotX: 26, rotY: 55, zoom: 120 },
 };
@@ -41,7 +41,44 @@ const errors = [];
 addEventListener('error', (e) => errors.push(`${e.message} @ ${e.filename}:${e.lineno}`));
 addEventListener('unhandledrejection', (e) => errors.push(`rejection: ${e.reason}`));
 
+const q = new URLSearchParams(location.search);
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const reduceMotion = false; 
+
+const debugPiece = q.get('piece');
+const poseOverride = { rx: q.has('rx') ? parseFloat(q.get('rx')) : null, ry: q.has('ry') ? parseFloat(q.get('ry')) : null };
+const debugP = q.has('p') ? parseFloat(q.get('p')) : null;
+const debugBg = q.has('bgp') ? parseFloat(q.get('bgp')) : null;
+const frozen = Boolean(debugPiece) || debugP !== null;
+
+
+const loaderMode = !(debugPiece || debugP !== null || debugBg !== null || q.has('probe'));
+const loaderEl = document.getElementById('loader');
+const enterBtn = document.getElementById('enter');
+const fillEl = loaderEl ? loaderEl.querySelector('.loader-fill') : null;
+document.documentElement.classList.toggle('locked', loaderMode);
+const nextPaint = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+function setLoad(frac) {
+  if (fillEl) fillEl.style.width = `${Math.round(frac * 100)}%`;
+}
+let entered = !loaderMode;
+function enter() {
+  if (entered) return;
+  entered = true;
+  if (loaderEl) loaderEl.classList.add('done');
+  setTimeout(() => {
+    document.documentElement.classList.remove('locked');
+    scrollTo(0, 0);
+    if (loaderEl) loaderEl.remove();
+    document.body.classList.add('entered');
+    requestAnimationFrame(frame);
+  }, 320);
+}
+if (enterBtn) enterBtn.addEventListener('click', enter);
+
 await document.fonts.ready;
+setLoad(0.1);
+await nextPaint();
 
 let cellW = 8;
 let cellH = 14;
@@ -64,15 +101,8 @@ bg.resize(innerWidth, innerHeight, cellW, cellH);
 const corpus = await fetch('assets/texts/texts.json').then((r) => r.json());
 const quoteFor = (id) => corpus.texts.find((t) => t.piece === id);
 
-const q = new URLSearchParams(location.search);
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-const reduceMotion = false; // la obra depende del movimiento: nunca se reduce
-
-const debugPiece = q.get('piece');
-const poseOverride = { rx: q.has('rx') ? parseFloat(q.get('rx')) : null, ry: q.has('ry') ? parseFloat(q.get('ry')) : null };
-const debugP = q.has('p') ? parseFloat(q.get('p')) : null;
-const debugBg = q.has('bgp') ? parseFloat(q.get('bgp')) : null;
-const frozen = Boolean(debugPiece) || debugP !== null;
+setLoad(0.18);
+await nextPaint();
 
 function poseOf(id) {
  const pose = { ...POSES[id] };
@@ -104,7 +134,11 @@ function fitPiece(piece) {
  model.update(0);
 }
 
+setLoad(0.3);
+await nextPaint();
 for (const piece of PIECES) fitPiece(piece);
+setLoad(0.85);
+await nextPaint();
 
 const FREEZE_LO = 0.05;
 const FREEZE_HI = 0.85;
@@ -120,11 +154,8 @@ function stateOf(p) {
  return clamp((p - FREEZE_LO) / (FREEZE_HI - FREEZE_LO), 0, 1);
 }
 
-// Cada artefacto aparece desde el negro, se sostiene, y se apaga antes del siguiente.
-const stageOpacity = (p, id) => {
-  if (id === 'book') return (0.75 + 0.25 * sm(0, 0.12, p)) * (1 - sm(0.88, 0.99, p));
-  return sm(0.01, 0.15, p) * (1 - sm(0.88, 0.99, p));
-};
+
+const stageOpacity = (p) => sm(0.01, 0.15, p) * (1 - sm(0.88, 0.99, p));
 const titleForm = (p) => sm(0.02, 0.44, p) * (1 - sm(0.86, 0.98, p));
 
 const sections = [...document.querySelectorAll('.piece')].map((el) => ({
@@ -186,6 +217,9 @@ sections.forEach((s, i) => {
  if (reduceMotion || frozen) { s.tw?.finish(); s.dz?.set(1); }
 });
 
+setLoad(0.92);
+await nextPaint();
+
 function activeIndex() {
  const mid = scrollY + innerHeight * 0.5;
  let idx = 0;
@@ -241,6 +275,7 @@ function redraw(now) {
 
 const damped = new Map();
 let last = performance.now();
+let lastScrollY = -1;
 let lastRedraw = 0;
 let stageO = -1;
 let smoothG = 0;
@@ -249,17 +284,19 @@ const FRAME_MS = 16;
 function frame(now) {
  const dt = Math.min(1 / 20, (now - last) / 1000);
  last = now;
+ const scrolled = scrollY !== lastScrollY;
+ lastScrollY = scrollY;
 
  const idx = debugPiece ? sections.findIndex((s) => s.id === debugPiece) : activeIndex();
  if (idx >= 0 && idx !== current) applyPiece(idx);
 
- // Titulos y poemas de todas las piezas siguen su propio progreso.
+ 
   for (const s of sections) {
     const p = progressOf(s);
     if (!frozen && !reduceMotion) {
-      s.dz?.frame?.(now);
+      if (scrolled) s.dz?.frame?.(now);
       s.dz?.set(titleForm(p));
-      s.tw?.setScroll(p, now, dt); // interactivo: escribe hacia abajo, borra hacia arriba
+      s.tw?.setScroll(p, now, dt); 
     }
   }
 
@@ -272,7 +309,9 @@ function frame(now) {
  damped.set(section.id, next);
 
  const model = models.get(section.id);
- const animating = model.animated || stage.burn > 0 || stage.scatter > 0 || stageO > 0.005;
+ const enterK = frozen ? 1 : sm(8, 80, scrollY);
+ const oTarget = frozen ? 1 : stageOpacity(p) * enterK;
+ const animating = model.animated || stage.burn > 0 || stage.scatter > 0 || Math.abs(oTarget - stageO) > 0.003;
  const changed = Math.abs(next - section.state) > 0.0012;
  if ((changed || animating) && now - lastRedraw >= FRAME_MS) {
  section.state = next;
@@ -280,7 +319,7 @@ function frame(now) {
  redraw(now);
  updateGlow(next);
  }
- const o = frozen ? 1 : stageOpacity(p, section.id);
+ const o = oTarget;
  if (Math.abs(o - stageO) > 0.003) {
  stageO = o;
  host.style.setProperty('--stage-o', o.toFixed(3));
@@ -406,8 +445,6 @@ const fit = () => {
 };
 window.addEventListener('resize', fit);
 
-requestAnimationFrame(frame);
-
 {
  const box = document.querySelector('.credits');
  if (box && !box.textContent.trim()) {
@@ -450,4 +487,16 @@ if (q.has('probe')) {
  })();
 }
 
-window.__artefactos = { stage, models, corpus, sections, bg, errors };
+window.__artefact0s = { stage, models, corpus, sections, bg, errors };
+
+if (loaderMode) {
+ setLoad(1);
+ if (loaderEl) loaderEl.classList.add('ready');
+ if (enterBtn) { enterBtn.disabled = false; enterBtn.focus({ preventScroll: true }); }
+} else {
+ if (loaderEl) loaderEl.classList.add('done');
+ document.documentElement.classList.remove('locked');
+ if (loaderEl) setTimeout(() => loaderEl.remove(), 500);
+ document.body.classList.add('entered');
+ requestAnimationFrame(frame);
+}

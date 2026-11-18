@@ -1,6 +1,6 @@
-// Dissolve tipográfico y espectral para los títulos de cada pieza.
-// El texto se disuelve gradualmente desde el polvo y glifos ASCII/glitch
-// hasta consolidar el título en Newsreader mayúsculas con proporciones nobles.
+
+
+
 
 const RAMP = " .·░▒▓█";
 const GLITCH = ["·", "░", "▒", "▓", "*", "+", "x", "X", "#", "%", "@", "$", "&"];
@@ -61,7 +61,7 @@ export class Dissolve {
         continue;
       }
 
-      // Umbral progresivo para cada carácter a lo largo del scroll
+      
       const thr = (i / Math.max(1, len)) * 0.52 + hash(i, this.seed) * 0.22;
       const loc = (t - thr) / 0.26;
 
@@ -69,17 +69,17 @@ export class Dissolve {
         span.textContent = "";
         span.className = "dz-char";
       } else if (loc < 0.32) {
-        // Fase 1: polvo tenue
+        
         const gIdx = Math.floor(hash(i, Math.floor(this.now * 0.006) + 11) * 3);
         span.textContent = ["·", ".", " "][gIdx];
         span.className = "dz-char dz-glitch";
       } else if (loc < 0.88) {
-        // Fase 2: glitch / rampa de caracteres de memoria
+        
         const gIdx = Math.floor(hash(i, Math.floor(this.now * 0.01) + 23) * GLITCH.length);
         span.textContent = GLITCH[gIdx];
         span.className = "dz-char dz-glitch";
       } else {
-        // Fase 3: carácter tipográfico nítido
+        
         span.textContent = ch;
         span.className = "dz-char";
       }
@@ -88,10 +88,10 @@ export class Dissolve {
 
   frame(now) {
     this.now = now;
-    // Si estamos en medio de una transición, animar suavemente los glifos vivos
+    
     if (this.t > 0.02 && this.t < 0.98) {
       const prevT = this.t;
-      this.t = -1; // forzar actualización de glitch
+      this.t = -1; 
       this.set(prevT);
     }
   }

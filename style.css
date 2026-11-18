@@ -36,10 +36,9 @@ body{font-family:var(--mono);font-size:17px;line-height:28px;font-weight:400}
 }
 .skip-link:focus-visible{transform:translateY(0)}
 
-/* Fondo: grilla ASCII de baja saturacion, las siluetas se revelan con el scroll. */
-.bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;background:var(--bg)}
+.bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;background:var(--bg);opacity:0;transition:opacity .6s var(--ease)}
+body.entered .bg{opacity:1}
 
-/* Escenario ASCII centrado; los poemas se reparten a los costados. */
 .stage{
  position:fixed;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
  overflow:hidden;touch-action:pan-y;cursor:grab;opacity:var(--stage-o,0);
@@ -84,7 +83,7 @@ body{font-family:var(--mono);font-size:17px;line-height:28px;font-weight:400}
 .js .citation footer{opacity:0;transition:opacity .9s var(--ease)}
 .js .citation.is-done footer{opacity:1}
 .citation footer::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent);vertical-align:middle;margin-right:8px}
-.cursor{display:inline-block;width:.6ch;height:1.05em;margin-left:1px;vertical-align:text-bottom;background:var(--paper);animation:blink 1s steps(1) infinite}
+.cursor{display:inline-block;width:0;overflow:visible;margin-left:1px;vertical-align:text-bottom;color:var(--paper);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 
 .closing{position:relative;background:linear-gradient(to bottom,rgba(6,6,7,0),rgba(6,6,7,.92) 16%)}
@@ -113,3 +112,30 @@ a{color:var(--accent);text-underline-offset:3px}
  .piece-title{font-size:22px;line-height:30px}
  .citation p{font-size:14px;line-height:22px}
 }
+
+html.locked,html.locked body{overflow:hidden}
+.loader{
+ position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:24px;background:var(--bg);
+ transition:opacity .32s var(--ease);
+}
+.loader.done{opacity:0;pointer-events:none}
+.loader-title{
+ margin:0;font-family:'Newsreader',Georgia,serif;font-size:clamp(52px,9vw,76px);line-height:1.08;
+ letter-spacing:-0.01em;color:var(--ink);
+}
+.loader-track{width:min(320px,64vw);height:2px;background:var(--hairline);margin:0}
+.loader-fill{display:block;height:100%;width:0;background:var(--paper);transition:width .8s var(--ease)}
+@media (max-width:720px){
+ .loader{gap:20px;padding:0 24px}
+ .enter{padding:14px 40px;width:min(280px,72vw)}
+}
+.enter{
+ padding:14px 56px;background:#000;color:#fff;border:1px solid var(--paper);
+ font-family:var(--mono);font-size:17px;line-height:24px;letter-spacing:.06em;cursor:pointer;
+ opacity:0;visibility:hidden;-webkit-tap-highlight-color:transparent;
+ transition:opacity 1s var(--ease),visibility 0s linear 1s,background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease);
+}
+.loader.ready .enter{opacity:1;visibility:visible;transition:opacity 1s var(--ease),background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+.loader.ready .enter:hover{background:#fff;color:#000;border-color:#fff}
+.loader.ready .enter:focus-visible{outline:2px solid #fff;outline-offset:4px}

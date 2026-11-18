@@ -4,15 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0c10">
-  <title>Artefactos de memoria</title>
+  <title>arte/fact0s</title>
   <meta name="description" content="Seis objetos de la última dictadura cívico-militar argentina reconstruidos como cuerpos tipográficos y memoria literaria.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230b0c10'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' fill='%23cfc7b8' text-anchor='middle'%3E%C2%B7%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+  <link rel="preload" href="assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/paper-mono.woff2" as="font" type="font/woff2" crossorigin>
   <script>document.documentElement.classList.add('js')</script>
   <script type="importmap">{"imports":{"three":"./vendor/three.js","glyphcss":"./vendor/glyphcss.js"}}</script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al texto</a>
+  <div id="loader" class="loader">
+    <p class="loader-title">arte/fact0s</p>
+    <p class="loader-track" aria-hidden="true"><span class="loader-fill"></span></p>
+    <button id="enter" class="enter" type="button" disabled>Entrar</button>
+  </div>
+  <noscript><style>#loader{display:none}</style></noscript>
   <div id="stage" class="stage" aria-hidden="true"></div>
  <canvas id="bg" class="bg" aria-hidden="true"></canvas>
   <main class="column" id="main-content">

@@ -88,10 +88,10 @@ export class Typewriter {
     if (Math.abs(diff) < 0.001) {
       this.curT = this.targetT;
     } else if (diff > 0) {
-      // Seguimiento interactivo fiel al scroll con cadencia orgánica
+      
       this.curT += diff * Math.min(1, dt * 9);
     } else {
-      // Borrado rápido en reversa al scrollear hacia arriba
+      
       this.curT += diff * Math.min(1, dt * 15);
     }
 
@@ -109,7 +109,7 @@ export class Typewriter {
 
     const active = p > 0.02 && p < 0.98 && this.curT > 0.005;
     const idle = Math.max(0, nowSec - this.lastEventTime);
-    // Cursor parpadeante continuo
+    
     const lit = active && (idle < 0.4 || (idle - 0.4) % 0.9 > 0.45);
     const isDone = this.curT >= this.doneTime * 0.96 && p <= 0.88;
 
@@ -146,9 +146,14 @@ export class Typewriter {
     const parts = s.split("\n");
     const lastIdx = Math.max(0, Math.min(parts.length - 1, this.spans.length - 1));
     for (let k = 0; k < this.spans.length; k++) {
-      let txt = parts[k] ?? "";
-      if (showCursor && k === lastIdx && s.length > 0) txt += CURSOR;
+      const txt = parts[k] ?? "";
       this.spans[k].textContent = txt;
+      if (showCursor && k === lastIdx && s.length > 0) {
+        const cur = document.createElement("span");
+        cur.className = "cursor";
+        cur.textContent = CURSOR;
+        this.spans[k].appendChild(cur);
+      }
     }
   }
 }
