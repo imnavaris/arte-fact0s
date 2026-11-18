@@ -14,7 +14,7 @@ const ALL_CHARS = [
   ...GLYPHS_HEAVY
 ];
 
-const ALPHAS = [0.12, 0.28, 0.50, 0.78];
+const ALPHAS = [0.06, 0.14, 0.26, 0.42];
 const TW = 28;
 const TH = 20;
 

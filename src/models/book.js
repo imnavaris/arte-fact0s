@@ -18,27 +18,27 @@ export function createBook(){
   const brassMat=mat('#dfd8c8',{roughness:.3,metalness:.4});
   const spineMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
-   g.addColorStop(0,'#948c7e');g.addColorStop(.5,'#b5ad9e');g.addColorStop(1,'#948c7e');
+   g.addColorStop(0,'#b07a1e');g.addColorStop(.5,'#d99b26');g.addColorStop(1,'#b07a1e');
    c.fillStyle=g;c.fillRect(0,0,w,h);
-   c.fillStyle='#dfd8c8';
+   c.fillStyle='#f5f0e4';
    for(const y of [.14,.32,.5,.68,.86])c.fillRect(0,y*h-4,w,8);
   },{roughness:.55,metalness:.1});
 
   const pageBlockMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
-   g.addColorStop(0,'#c8c0b0');g.addColorStop(.7,'#e6dfd1');g.addColorStop(1,'#b5ad9e');
+   g.addColorStop(0,'#e8e4da');g.addColorStop(.7,'#ffffff');g.addColorStop(1,'#e8e4da');
    c.fillStyle=g;c.fillRect(0,0,w,h);
-   c.fillStyle='rgba(140,132,118,0.25)';
+   c.fillStyle='rgba(160,152,140,0.18)';
    for(let y=0;y<h;y+=6)c.fillRect(0,y,w,2);
   },{roughness:.65,metalness:.03});
 
   const paperMat=texMat((c,w,h)=>{
    const g=c.createRadialGradient(w*.32,h*.5,12,w*.5,h*.5,w*.72);
-   g.addColorStop(0,'#d4ccb8');
-   g.addColorStop(.6,'#ebe4d6');
-   g.addColorStop(1,'#b8b0a0');
+   g.addColorStop(0,'#f2eee6');
+   g.addColorStop(.6,'#ffffff');
+   g.addColorStop(1,'#e6e2d8');
    c.fillStyle=g;c.fillRect(0,0,w,h);
-   c.fillStyle='rgba(120,112,98,0.22)';
+   c.fillStyle='rgba(140,132,120,0.16)';
    for(let y=26;y<h-26;y+=12)c.fillRect(26,y,w-58-(y%22),2);
   },{roughness:.65,metalness:.02});
 

@@ -64,10 +64,13 @@ export function createBirds(){
   function applyState(){
     const p=curP;
     const open=sm(.04,.58,p);
-    cage.rotation.y=Math.sin(p*Math.PI*.6)*.18+Math.sin(curT*1.2)*.03;
+    const exit=sm(.6,.95,p);
+    cage.visible=exit<1;
+    cage.position.y=-exit*8;
+    cage.rotation.y=(Math.sin(p*Math.PI*.6)*.18+Math.sin(curT*1.2)*.03)*(1-exit);
     bars.forEach(({g,tan},idx)=>{
       const stagger=sm(idx*0.015,0.52+idx*0.015,p);
-      g.quaternion.setFromAxisAngle(tan,-stagger*1.18);
+      g.quaternion.setFromAxisAngle(tan,-stagger*1.35);
     });
     rings.visible=open<.78;
     rings.scale.set(1+open*.45,1-open*.15,1+open*.45);
