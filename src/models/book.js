@@ -98,26 +98,26 @@ export function createBook(){
   for(const sign of [-1,1]){
    const half=new T.Group();
    half.position.set(sign*.14,-.46,0);
-   half.rotation.z=-sign*.52;
+   half.rotation.z=-sign*.34;
    root.add(half);
 
    
-   box(half,[1.68,.10,2.14],coverMat,[sign*.84,-.05,0]);
-   box(half,[1.40,.045,1.84],coverMat,[sign*.84,-.11,0]);
-   box(half,[.52,.055,.66],brassMat,[sign*.84,-.12,0]);
+   box(half,[1.90,.10,2.14],coverMat,[sign*.95,-.05,0]);
+   box(half,[1.62,.045,1.84],coverMat,[sign*.95,-.11,0]);
+   box(half,[.52,.055,.66],brassMat,[sign*.95,-.12,0]);
    for(const cz of [-.98,.98]){
-    box(half,[.28,.12,.28],brassMat,[sign*1.55,-.05,cz]);
+    box(half,[.28,.12,.28],brassMat,[sign*1.72,-.05,cz]);
    }
 
    
-   box(half,[1.56,.20,2.02],pageBlockMat,[sign*.80,.09,0]);
+   box(half,[1.78,.20,2.02],pageBlockMat,[sign*.90,.09,0]);
 
    
    for(let n=0;n<9;n++){
-    const height=.18+n*.05;
+    const height=.18+n*.025;
     const page=surface(half,18,14,(u,v)=>{
-     const arch=Math.sin(u*Math.PI)*(.18+n*.014)-u*.04;
-     return [sign*(.02+u*1.56),height+arch,(v-.5)*1.98];
+     const arch=Math.sin(u*Math.PI)*(.10+n*.008)-u*.04;
+     return [sign*(.02+u*1.76),height+arch,(v-.5)*1.98];
     },paperMat,sign<0);
     pages.push({mesh:page,sign,n,height});
    }
@@ -152,12 +152,12 @@ export function createBook(){
      const {mesh,sign,n,height}=pg;
      mesh.material=amount>=1?charMat:amount>0?emberMat:paperMat;
      morph(mesh,18,14,(u,v)=>{
-      const arch=Math.sin(u*Math.PI)*(.18+n*.014)-u*.04;
+      const arch=Math.sin(u*Math.PI)*(.10+n*.008)-u*.04;
       const shrink=1-.34*amount;
       const curl=amount*.30*Math.sin(u*Math.PI)*Math.pow(v,2);
       const edge=amount*.22*Math.pow(Math.abs(u-.5)*2,3);
       return [
-       sign*(.02+u*1.56*shrink),
+       sign*(.02+u*1.76*shrink),
        height+arch+curl+edge,
        (v-.5)*1.98*shrink
       ];

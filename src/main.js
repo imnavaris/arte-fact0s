@@ -234,10 +234,27 @@ const userAngles = new Map();
 let yaw = 0;
 let pitch = 0;
 let targetY = -1, appliedY = -1, smoothed = false;
+let ghost = null;
+const parseRGB = (hex) => {
+  if (typeof hex !== "string" || hex.length !== 7 || hex[0] !== "#") return [200, 200, 200];
+  return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
+};
+const toHex = (r, g, b) => "#" + [r, g, b].map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, "0")).join("");
 
 function applyPiece(index) {
  const prev = sections[current];
  if (prev && prev.tw && prev.twState === 'started' && !prev.tw.done) prev.tw.finish();
+ if (prev && prev.lastPolys) {
+   ghost = {
+     polys: prev.lastPolys.map((pg) => ({ vertices: pg.vertices.map((v) => [v[0], v[1], v[2]]), color: pg.color })),
+     cols: prev.lastPolys.map((pg) => parseRGB(pg.color)),
+     y0: (typeof scrollY !== "undefined" ? scrollY : 0),
+     lift: 0,
+     burn: stage.burn,
+     scatter: stage.scatter,
+     cam: { rotX: stage.camera.rotX, rotY: stage.camera.rotY, zoom: stage.camera.zoom },
+   };
+ } else ghost = null;
  const section = sections[index];
  const pose = poseOf(section.id);
  const angles = userAngles.get(section.id) || { yaw: 0, pitch: 0 };
@@ -254,6 +271,12 @@ function applyPiece(index) {
  current = index;
  section.state = -1;
  damped.set(section.id, -0.2);
+ if (ghost) {
+   ghost.camTo = { rotX: stage.camera.rotX, rotY: stage.camera.rotY, zoom: stage.camera.zoom };
+   stage.camera.rotX = ghost.cam.rotX;
+   stage.camera.rotY = ghost.cam.rotY;
+   stage.camera.zoom = ghost.cam.zoom;
+ }
  redraw(performance.now());
 }
 
@@ -264,16 +287,37 @@ function redraw(now) {
  model.update(Math.max(0, section.state));
  model.frame?.(now);
  const st0 = clamp(section.state, 0, 1);
- model.root.position.y += sm(0.82, 1, st0) * 6 - (1 - sm(0, 0.12, st0)) * 6;
- stage.setBurn(model.burn ? model.burn(Math.max(0, section.state)) : 0);
+ model.root.position.y += sm(0.82, 1, st0) * 3 - (1 - sm(section.top - 1200, section.top + 100, scrollY)) * 2;
+ const burnVal = model.burn ? model.burn(Math.max(0, section.state)) : (ghost ? ghost.burn : 0);
+stage.setBurn(burnVal);
  stage.setTvStatic(model.tvStatic ? model.tvStatic(Math.max(0, section.state)) : 0, now);
-	if (model.isSilhouette) {
-		stage.setScatter(sm(0.4, 1.0, section.state));
-	} else {
-		stage.setScatter(0);
-	}
+stage.setScatter(model.isSilhouette ? sm(0.6, 1.0, Math.max(0, section.state)) : (ghost ? ghost.scatter : 0));
  if (stage.burn > 0) stage.fireStep();
- stage.setPolygons(toGlyphPolygons(model.root));
+ const fresh = toGlyphPolygons(model.root);
+section.lastPolys = fresh;
+let polys = fresh;
+if (ghost) {
+  const gt = Math.min(1, Math.abs(scrollY - ghost.y0) / 600);
+  const gl = gt * 2.5;
+  const dl = gl - ghost.lift;
+  ghost.lift = gl;
+  const gp = ghost.polys;
+  for (let gi = 0; gi < gp.length; gi++) {
+    const vs = gp[gi].vertices;
+    for (let vi = 0; vi < vs.length; vi++) vs[vi][1] += dl;
+    const gc = ghost.cols[gi];
+    gp[gi].color = toHex(gc[0] + (5 - gc[0]) * gt, gc[1] + (6 - gc[1]) * gt, gc[2] + (7 - gc[2]) * gt);
+  }
+  if (gt >= 1) ghost = null;
+  else {
+    const ge = gt * gt * (3 - 2 * gt);
+    stage.camera.rotX = ghost.cam.rotX + (ghost.camTo.rotX - ghost.cam.rotX) * ge;
+    stage.camera.rotY = ghost.cam.rotY + (ghost.camTo.rotY - ghost.cam.rotY) * ge;
+    stage.camera.zoom = ghost.cam.zoom + (ghost.camTo.zoom - ghost.cam.zoom) * ge;
+    polys = [...gp, ...fresh];
+  }
+}
+stage.setPolygons(polys);
 }
 
 const damped = new Map();
@@ -332,7 +376,8 @@ function frame(now) {
  redraw(now);
  updateGlow(next);
  }
- const o = oTarget;
+ const oGhost = ghost ? Math.max(0, 1 - Math.abs(scrollY - ghost.y0) / 600) : -1;
+ const o = Math.max(oTarget, oGhost);
  if (Math.abs(o - stageO) > 0.003) {
  stageO = o;
  host.style.setProperty('--stage-o', o.toFixed(3));
@@ -510,7 +555,7 @@ if (q.has('probe')) {
  })();
 }
 
-window.__artefact0s = { stage, models, corpus, sections, bg, errors };
+window.__artefact0s = { stage, models, corpus, sections, bg, errors, get ghost() { return ghost ? { n: ghost.polys.length, lift: +ghost.lift.toFixed(2), y0: Math.round(ghost.y0) } : null; } };
 
 if (loaderMode) {
  setLoad(1);

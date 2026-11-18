@@ -205,7 +205,7 @@ export class GlyphStage {
         const h2 = (hash(c + 19, r + 47) % 1000) / 1000;
         const relY = (r - e.minR) / spanR;
         const relEdge = Math.min(1, Math.abs(c - midC) / halfW);
-        const releaseAt = relY * 0.3 + (1 - relEdge) * 0.2 + h1 * 0.18;
+        const releaseAt = relY * 0.45 + (1 - relEdge) * 0.3 + h1 * 0.27;
         if (s <= releaseAt) {
           tempChar[i] = ch;
           if (tempColor && grid.color) tempColor[i] = grid.color[i];
@@ -215,7 +215,7 @@ export class GlyphStage {
         const flight = Math.min(1, (s - releaseAt) / Math.max(0.18, 0.92 - releaseAt));
         const dirX = (c >= midC ? 1 : -1) * (0.15 + relEdge * 0.4) + (h1 - 0.5) * 0.5;
         const dirY = -0.9 - (1 - relY) * 0.3 + (h2 - 0.5) * 0.4;
-        const dist = Math.pow(flight, 2.2) * maxSpan * (0.3 + 0.4 * h2);
+        const dist = Math.pow(flight, 1.3) * maxSpan * (0.3 + 0.4 * h2);
         const swirl = Math.sin(flight * 6.0 + h1 * 6.28) * 1.5 * flight;
         const nr = Math.round(r + dirY * dist + swirl);
         const nc = Math.round(c + dirX * dist * 1.35 - swirl);
