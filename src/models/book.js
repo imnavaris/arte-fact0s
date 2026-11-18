@@ -66,11 +66,11 @@ export function createBook(){
   
   const emberMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w*.3,h);
-   g.addColorStop(0,'#d99b26');
-   g.addColorStop(.4,'#e89c28');
-   g.addColorStop(1,'#9e8678');
+   g.addColorStop(0,'#efe9dd');
+   g.addColorStop(.4,'#fbf8f2');
+   g.addColorStop(1,'#cfc7b8');
    c.fillStyle=g;c.fillRect(0,0,w,h);
-   c.strokeStyle='rgba(217,155,38,0.7)';
+   c.strokeStyle='rgba(150,142,130,0.55)';
    c.lineWidth=2;
    for(let i=0;i<9;i++){
     const y=10+i*(h-20)/8;
@@ -80,7 +80,6 @@ export function createBook(){
     c.stroke();
    }
   },{roughness:.75,metalness:.05});
-  emberMat.userData = { isEmber: true };
 
   const pages=[];
 

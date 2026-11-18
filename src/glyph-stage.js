@@ -17,7 +17,7 @@ const TV_GRAY = Array.from({ length: 256 }, (_, q) => {
 const lerp = (a, b, t) => a + (b - a) * t;
 const FIRE_COLORS = Array.from({ length: FIRE_MAX + 1 }, (_, h) => {
   const t = h / FIRE_MAX;
-  const stops = [[90, 46, 16], [185, 92, 20], [235, 158, 34], [255, 220, 120], [255, 246, 215]];
+  const stops = [[74, 70, 64], [140, 132, 122], [205, 197, 186], [245, 240, 230], [255, 255, 255]];
   const f = t * (stops.length - 1);
   const i = Math.min(stops.length - 2, Math.floor(f));
   const k = f - i;
@@ -285,6 +285,7 @@ export class GlyphStage {
       const minTongueR = Math.max(0, topR - Math.min(3, Math.ceil(colBurn * 3.5)));
       for (let r = minTongueR; r <= frontR; r++) {
         const i = r * cols + c;
+        if (grid.color[i] === '#d99b26') continue;
         const hv = h[i];
         const occupied = this.occ[i] === 1;
         const distToFront = frontR - r;
@@ -299,10 +300,10 @@ export class GlyphStage {
         if (distToFront <= 4 && hv > 2) {
           const fIdx = Math.min(FIRE.length - 1, Math.max(2, Math.floor((hv / (FIRE_MAX + 1)) * FIRE.length)));
           grid.char[i] = FIRE[fIdx];
-          if (grid.color) grid.color[i] = FIRE_COLORS[Math.min(FIRE_MAX, hv + 4)];
+          if (grid.color) grid.color[i] = "#3f3b34";
         } else if (distToFront <= 8 && hv > 4) {
           grid.char[i] = FIRE[Math.min(6, Math.floor((hv / FIRE_MAX) * 7))];
-          if (grid.color) grid.color[i] = "#d99b26";
+          if (grid.color) grid.color[i] = "#cfc7b8";
         } else {
           grid.char[i] = ASH[hash(r, c) % ASH.length];
           if (grid.color) grid.color[i] = "#9e9484";
