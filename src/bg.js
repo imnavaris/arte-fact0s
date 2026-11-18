@@ -112,6 +112,10 @@ export function createBackground(canvas) {
   let atlas = null;
   const charMap = new Map();
   let prog = 0;
+  let lastDrawT = -1e9;
+  let drawnProg = -1;
+  let dotsLayer = null;
+  let figIdx = null;
 
   function buildAtlas() {
     atlas = document.createElement('canvas');
@@ -175,6 +179,22 @@ export function createBackground(canvas) {
 
     buildAtlas();
     setProgress(prog);
+
+    dotsLayer = document.createElement('canvas');
+    dotsLayer.width = canvas.width;
+    dotsLayer.height = canvas.height;
+    const dctx = dotsLayer.getContext('2d');
+    const dotIdx = charMap.get('.') || 1;
+    const figs = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const i = r * cols + c;
+        if (mask[i] < 0.09) {
+          if (r % 2 === 0 && c % 3 === 0) dctx.drawImage(atlas, dotIdx * cwp, 0, cwp, chp, c * cwp, r * chp, cwp, chp);
+        } else figs.push(i);
+      }
+    }
+    figIdx = new Int32Array(figs);
   }
 
   function setProgress(p) {
@@ -189,31 +209,28 @@ export function createBackground(canvas) {
 
   function draw(now = 0) {
     if (!atlas || !mask) return;
+    if (now - lastDrawT < 120 && Math.abs(prog - drawnProg) < 0.002) return;
+    lastDrawT = now;
+    drawnProg = prog;
     ctx.fillStyle = '#050608';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (dotsLayer) ctx.drawImage(dotsLayer, 0, 0);
 
     const dotIdx = charMap.get('.') || 1;
-    const tSec = now * 0.001;
     const glitchClock = Math.floor(now * 0.008);
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const i = r * cols + c;
-        const m = mask[i];
-        const t = tileIdx[i];
+    const breathOf = new Float32Array(numTiles);
+    for (let t = 0; t < numTiles; t++) breathOf[t] = 1 + 0.07 * Math.sin(now * 0.0016 + tileOrder[t] * 6.28);
 
-        
-        if (m < 0.09) {
-          if (r % 2 === 0 && c % 3 === 0) {
-            ctx.drawImage(atlas, dotIdx * cwp, 0, cwp, chp, c * cwp, r * chp, cwp, chp);
-          }
-          continue;
-        }
+    for (let k = 0; k < figIdx.length; k++) {
+      const i = figIdx[k];
+      const r = (i / cols) | 0;
+      const c = i % cols;
+      const m = mask[i];
+      const t = tileIdx[i];
 
         const rev = tileRev[t];
-        
-        const breath = 1 + 0.07 * Math.sin(tSec * 1.6 + tileOrder[t] * 6.28);
-        const intensity = clamp(m * rev * breath, 0, 1);
+        const intensity = clamp(m * rev * breathOf[t], 0, 1);
         if (intensity < 0.08) continue;
 
         
@@ -240,7 +257,6 @@ export function createBackground(canvas) {
         const atlasY = al * chp;
 
         ctx.drawImage(atlas, cIdx * cwp, atlasY, cwp, chp, c * cwp, r * chp, cwp, chp);
-      }
     }
   }
 

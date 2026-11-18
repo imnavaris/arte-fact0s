@@ -144,6 +144,8 @@ export function createBook(){
     root.rotation.y=-.22+Math.sin(p*Math.PI)*.18+Math.cos(t*1.3)*.015;
     burnOrder.forEach((pg,i)=>{
      const amount=burnAt(i,p);
+     if (Math.abs(amount-(pg._last??-1))<1e-4) return;
+     pg._last=amount;
      const {mesh,sign,n,height}=pg;
      mesh.material=amount>=1?charMat:amount>0?emberMat:paperMat;
      morph(mesh,18,14,(u,v)=>{

@@ -25,14 +25,18 @@ function samplerFor(texture) {
 export function invalidateTexture(texture) { SAMPLERS.delete(texture); }
 
 const hex = (r, g, b) => '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+const PAPER_LUT = Array.from({ length: 256 }, (_, l) => {
+  const t = 0.48 + 0.52 * Math.pow(l / 255, 0.75);
+  return hex(Math.round(255 * t), Math.round(250 * t), Math.round(240 * t));
+});
+const GRAY_LUT = Array.from({ length: 256 }, (_, l) => hex(l, l, l));
 
 
 function clampPaperColor(r, g, b, allowEmber = false) {
  if (allowEmber) return '#d99b26';
- const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+ const lum = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
  
- const t = 0.48 + 0.52 * Math.pow(Math.min(1, Math.max(0, lum)), 0.75);
- return hex(Math.round(255 * t), Math.round(250 * t), Math.round(240 * t));
+ return PAPER_LUT[Math.min(255, Math.max(0, lum))];
 }
 
 export function toGlyphPolygons(root, opts = {}) {
@@ -50,6 +54,7 @@ export function toGlyphPolygons(root, opts = {}) {
  const uv = geo.attributes.uv;
  const sample = samplerFor(mat && mat.map);
  const base = mat && mat.color ? mat.color.getHexString() : 'ffffff';
+ const baseR = parseInt(base.slice(0, 2), 16), baseG = parseInt(base.slice(2, 4), 16), baseB = parseInt(base.slice(4, 6), 16);
  const fixed = mat && mat.userData && mat.userData.fixedColor;
  const noise = Boolean(mesh.userData.glyphNoise);
  const isEmber = Boolean(mat && mat.userData && mat.userData.isEmber);
@@ -72,10 +77,10 @@ export function toGlyphPolygons(root, opts = {}) {
  } else {
  const raw = painted
  ? [r / painted, g / painted, b / painted]
- : [parseInt(base.slice(0, 2), 16), parseInt(base.slice(2, 4), 16), parseInt(base.slice(4, 6), 16)];
+ : [baseR, baseG, baseB];
  if (noise) {
  const l = Math.round(0.299 * raw[0] + 0.587 * raw[1] + 0.114 * raw[2]);
- color = hex(l, l, l);
+ color = GRAY_LUT[Math.min(255, Math.max(0, l))];
  } else {
  color = clampPaperColor(Math.round(raw[0]), Math.round(raw[1]), Math.round(raw[2]), isEmber);
  }

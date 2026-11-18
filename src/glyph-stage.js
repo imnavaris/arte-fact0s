@@ -5,6 +5,15 @@ const FIRE = " .,:;+*xX#%@";
 const ASH = ".,\x27`";
 const FIRE_MAX = 36;
 const NOISE = " .:-=+*#%@";
+const TV_BLUE = Array.from({ length: 256 }, (_, q) => {
+  const s = Math.round(90 + (q / 255) * 165).toString(16).padStart(2, "0");
+  return `#${s}${s}ff`;
+});
+const TV_GRAY = Array.from({ length: 256 }, (_, q) => {
+  const a = Math.round(58 + (q / 255) * 197);
+  const s = a.toString(16).padStart(2, "0");
+  return `#${s}${s}${Math.min(255, a + 10).toString(16).padStart(2, "0")}`;
+});
 const lerp = (a, b, t) => a + (b - a) * t;
 const FIRE_COLORS = Array.from({ length: FIRE_MAX + 1 }, (_, h) => {
   const t = h / FIRE_MAX;
@@ -20,10 +29,17 @@ function hash(r, c) {
 }
 function isTvScreenCell(col) {
   if (typeof col !== "string" || col.length !== 7 || col[0] !== "#") return false;
-  const r = parseInt(col.slice(1, 3), 16);
-  const b = parseInt(col.slice(5, 7), 16);
-  return b - r >= 12;
+  let hit = screenCache.get(col);
+  if (hit === undefined) {
+    const r = parseInt(col.slice(1, 3), 16);
+    const b = parseInt(col.slice(5, 7), 16);
+    hit = b - r >= 12;
+    if (screenCache.size > 512) screenCache.clear();
+    screenCache.set(col, hit);
+  }
+  return hit;
 }
+const screenCache = new Map();
 export class GlyphStage {
   constructor(host, opts = {}) {
     this.host = host;
@@ -135,8 +151,7 @@ export class GlyphStage {
               const h = (hash(r + tick * 17, c + tick * 31) % 1000) / 1000;
               const v = Math.min(1, (1 - dR / band) * 0.9 + h * 0.35);
               grid.char[i] = NOISE[Math.min(NOISE.length - 1, Math.floor(v * NOISE.length))];
-              const sh = Math.round(90 + v * 165).toString(16).padStart(2, "0");
-              if (grid.color) grid.color[i] = `#${sh}${sh}ff`;
+              if (grid.color) grid.color[i] = TV_BLUE[Math.min(255, (v * 255) | 0)];
             } else {
               grid.char[i] = ".";
               if (grid.color) grid.color[i] = "#2c3347";
@@ -148,11 +163,7 @@ export class GlyphStage {
             const v = Math.min(1, (Math.pow(h, 1.3) * 0.86 + hum) * Math.min(1, (this.tvStatic - 0.1) / 0.5));
             const gIdx = Math.min(NOISE.length - 1, Math.floor(v * NOISE.length));
             grid.char[i] = NOISE[gIdx];
-            if (grid.color) {
-              const shade = Math.round(58 + v * 197);
-              const hexS = shade.toString(16).padStart(2, "0");
-              grid.color[i] = `#${hexS}${hexS}${Math.min(255, shade + 10).toString(16).padStart(2, "0")}`;
-            }
+            if (grid.color) grid.color[i] = TV_GRAY[Math.min(255, (v * 255) | 0)];
           }
           continue;
         }
