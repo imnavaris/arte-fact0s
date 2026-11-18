@@ -373,7 +373,7 @@ addEventListener('wheel', (e) => {
   if (!entered || frozen || e.shiftKey || e.ctrlKey || e.metaKey) return;
   if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
   e.preventDefault();
-  if (targetY < 0) targetY = scrollY;
+  if (targetY < 0) { targetY = scrollY; appliedY = scrollY; }
   const maxY = Math.max(0, document.documentElement.scrollHeight - innerHeight);
   targetY = clamp(targetY + e.deltaY * 1.15, 0, maxY);
 }, { passive: false });
