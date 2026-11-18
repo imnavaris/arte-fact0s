@@ -4,15 +4,15 @@ export function createTv() {
   const root = new T.Group();
   const bodyMat = texMat((c, w, h) => {
     const g = c.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, '#ffffff'); g.addColorStop(0.55, '#f4efe6'); g.addColorStop(1, '#dbd4c6');
+    g.addColorStop(0, '#f4f0e8'); g.addColorStop(0.55, '#efe9dd'); g.addColorStop(1, '#e2dccf');
     c.fillStyle = g; c.fillRect(0, 0, w, h);
-  }, { roughness: 0.35, metalness: 0.1 });
+  }, { roughness: 0.5, metalness: 0.05 });
   const trimMat = mat('#ffffff', { roughness: 0.2, metalness: 0.3 });
-  const darkMat = mat('#38342c', { roughness: 0.75, metalness: 0.1 });
+  const darkMat = mat('#4a443c', { roughness: 0.75, metalness: 0.1 });
   const knobMat = mat('#ffffff', { roughness: 0.2, metalness: 0.5 });
   const screenMat = mat('#384468', { roughness: 0.2, metalness: 0.0 });
   screenMat.userData = { fixedColor: '#384468' };
-  const backMat = mat('#24211c', { roughness: 0.9, metalness: 0.02 });
+  const backMat = mat('#35322c', { roughness: 0.9, metalness: 0.02 });
 
   box(root, [3.2, 2.4, 1.6], bodyMat, [0, 0, 0]);
   box(root, [2.3, 1.7, 1.0], backMat, [-0.1, 0, -1.25]);

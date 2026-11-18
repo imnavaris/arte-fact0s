@@ -16,8 +16,8 @@ export function createBirds(){
     c.fillStyle=g;c.fillRect(0,0,w,h);
   },{roughness:.18,metalness:.02});
   const beakMat=mat("#ffffff",{roughness:.2,metalness:.05});
-  const cageBarMat=mat("#f4f0e6",{roughness:.22,metalness:.05});
-  const cageRingMat=mat("#ffffff",{roughness:.18,metalness:.08});
+  const cageBarMat=mat("#8e8678",{roughness:.22,metalness:.05});
+  const cageRingMat=mat("#a49c8e",{roughness:.18,metalness:.08});
   const birds=[];
   for(let i=0;i<N;i++){
     const b=new T.Group();

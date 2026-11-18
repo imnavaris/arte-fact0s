@@ -30,7 +30,7 @@ const POSES = {
 
 const LIGHTS = {
   default: { direction: [0.45, 0.65, 0.8], intensity: 1.15 },
-  tv: { direction: [0.35, -0.75, 0.6], intensity: 1.25 },
+  tv: { direction: [0.35, 0.55, 0.85], intensity: 1.15 },
 };
 
 const host = document.getElementById('stage');
@@ -156,7 +156,7 @@ function stateOf(p) {
 
 
 const stageOpacity = (p) => sm(0.01, 0.15, p);
-const titleForm = (p) => sm(0.02, 0.44, p) * (1 - sm(0.86, 0.98, p));
+const titleForm = (p) => sm(0.02, 0.44, p);
 
 const sections = [...document.querySelectorAll('.piece')].map((el) => ({
  el,
@@ -233,6 +233,7 @@ let current = -1;
 const userAngles = new Map();
 let yaw = 0;
 let pitch = 0;
+let targetY = -1, appliedY = -1, smoothed = false;
 
 function applyPiece(index) {
  const prev = sections[current];
@@ -287,6 +288,15 @@ function frame(now) {
  last = now;
  const scrolled = scrollY !== lastScrollY;
  lastScrollY = scrollY;
+  const wasSmoothed = smoothed; smoothed = false;
+  if (targetY >= 0 && !wasSmoothed && scrollY !== appliedY) targetY = scrollY;
+  if (targetY >= 0 && entered && !frozen) {
+    const maxY = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    targetY = clamp(targetY, 0, maxY);
+    const ny = scrollY + (targetY - scrollY) * Math.min(1, dt * 7);
+    if (Math.abs(ny - scrollY) < 0.5) targetY = -1;
+    else { appliedY = ny; scrollTo(0, ny); smoothed = true; }
+  }
 
  const idx = debugPiece ? sections.findIndex((s) => s.id === debugPiece) : activeIndex();
  if (idx >= 0 && idx !== current) applyPiece(idx);
@@ -359,7 +369,16 @@ let startY = 0;
 let lastX = 0;
 let lastY = 0;
 
-host.addEventListener('pointerdown', (e) => {
+addEventListener('wheel', (e) => {
+  if (!entered || frozen || e.shiftKey || e.ctrlKey || e.metaKey) return;
+  if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  e.preventDefault();
+  if (targetY < 0) targetY = scrollY;
+  const maxY = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+  targetY = clamp(targetY + e.deltaY * 1.15, 0, maxY);
+}, { passive: false });
+
+host.addEventListener('pointerdown' , (e) => {
  dragging = true;
  startX = lastX = e.clientX;
  startY = lastY = e.clientY;
@@ -392,6 +411,7 @@ host.addEventListener('pointercancel', () => { dragging = false; });
 window.addEventListener('keydown', (e) => {
  const target = e.target;
  if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+  targetY = -1;
 
  if (e.shiftKey && e.key.startsWith('Arrow')) {
  e.preventDefault();
