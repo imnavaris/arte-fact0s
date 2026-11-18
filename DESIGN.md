@@ -2,7 +2,7 @@
 type: registro
 ---
 
-# DESIGN — Artefactos de memoria
+# DESIGN — arte/fact0s
 
 Documento de trabajo del sistema visual y de interacción. Fija lo decidido y marca lo que sigue abierto. Manda sobre `style.css` y sobre cualquier propuesta de UI; si el código actual dice otra cosa, el código está viejo.
 
@@ -43,7 +43,7 @@ scroll ↓                                            escenario
 │ 00  umbral              40vh    sin objeto, el título         │
 ├──────────────────────────────────────────────────────────────┤
 │ 01  el libro quemado   150vh    p .05→.75  se quema           │
-│ 02  el pañuelo         150vh    p .10→.70  se desata          │
+│ 02  la televisión     150vh    p .04→.45  la estática crece   │
 │ 03  la silueta         150vh    p .20→.85  se borra           │
 │ 04  las tijeras        150vh    p .20→.70  corta              │
 │ 05  los pájaros        150vh    p .20→.85  la jaula se cierra │
@@ -65,7 +65,7 @@ Prohibido animar la entrada y la salida del bloque de texto. Un fade a mitad de 
 
 ### El estado es una función del progreso
 
-`state = f(p)`, sin memoria y sin acumuladores. Subir deshace lo que bajar hizo: el libro vuelve a quemarse hacia atrás, el pañuelo se anuda, la silueta se rearma. Eso convierte al scroll en un scrubbing honesto y elimina la clase de bugs donde un estado queda pegado.
+`state = f(p)`, sin memoria y sin acumuladores. Subir deshace lo que bajar hizo: el libro vuelve a quemarse hacia atrás, la televisión apaga la estática, la silueta se rearma. Eso convierte al scroll en un scrubbing honesto y elimina la clase de bugs donde un estado queda pegado.
 
 Suavizado: `state += (target - state) * (1 - Math.exp(-dt * 5))`, con `dt` clampeado a `1/20 s`. La diferencia entre el scroll y el estado no debe superar los 150 ms percibidos. Si el usuario frena, el objeto frena en menos de un cuarto de segundo.
 
@@ -77,9 +77,13 @@ Suavizado: `state += (target - state) * (1 - Math.exp(-dt * 5))`, con `dt` clamp
 - `touch-action: pan-y` en el escenario. En táctil, el dedo vertical scrollea y el horizontal gira. Sin esto, el arrastre se come el scroll y la obra se vuelve inusable en teléfono.
 - Cursor `grab` / `grabbing`. Se elimina el `crosshair` actual.
 
+### Entrada
+
+La obra abre con el título sobre el fondo de puntos. El loader corre la carga pesada (fuente, corpus, seis encuadres) con solo la barra, en transición continua; al terminar, el botón Entrar aparece con fade in lento. Al entrar, el loader sale con fade out y el fondo entra con fade in; el escenario queda en negro hasta que el scroll pasa los 8 px: nada aparece sin el gesto de bajar. Las herramientas con query (`?piece=`, `?p=`, `?probe=`) saltean el loader.
+
 ### Dos textos, una fuente
 
-El bloque legible y la inscripción sobre el objeto salen del mismo string del corpus. Una sola fuente de verdad por pieza: `cita_id`. La excepción es el pañuelo, cuya inscripción es «NUNCA MÁS» y tiene su entrada propia en el corpus.
+El bloque legible y la inscripción sobre el objeto salen del mismo string del corpus. Una sola fuente de verdad por pieza: el `excerpt` de su cita en `texts.json` (`main.js` usa `inscription || excerpt`; hoy no hay `inscription` separada).
 
 - Bloque legible: texto real en el DOM, `blockquote` con `cite`. Es el que se lee y el que encuentra el buscador del navegador.
 - Texto esculpido: los mismos caracteres, en el mismo orden, mapeados sobre la superficie del objeto por layout de glifo, no por brillo medio. Las palabras se separan con `·` y cada verso arranca en una fila: la superficie tiene que leerse como poema, no como ruido. Decisión del autor (22/10/2026).
@@ -138,7 +142,7 @@ El libro quemado
 - Máximo 4 versos o 40 palabras por pieza, lo que sea menor. Sin poemas completos.
 - Obra y año en bastardilla; autor en redonda; `cite` con la URL o la edición en el HTML, invisible en pantalla.
 - El aviso de copyright no va pegado a cada cita: va una vez, al pie del bloque, en 16/24 y `#94a3b8`: «Fragmentos citados con fines de estudio. Procedencia completa en Créditos.»
-- La inscripción del pañuelo dice «NUNCA MÁS»: es la consigna de las Madres de Plaza de Mayo y es lo que tiene que leerse. El fragmento verificado de Gelman sigue en la columna de lectura. Decisión del autor (22/10/2026), que reemplaza la anterior.
+- El pañuelo salió del catálogo; su lugar lo ocupa la televisión (R. Walsh 1977, ap. 4; el objeto es decisión de la obra). La inscripción esculpe el `excerpt`, sin texto aparte.
 
 No hay convención de aviso de copyright en el Atlas. Lo anterior es decisión editorial, apoyada en la familia Editorial (colofón y créditos de revista monográfica).
 

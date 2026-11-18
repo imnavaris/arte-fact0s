@@ -2,7 +2,7 @@
 type: registro
 ---
 
-# AGENTS.md: Artefactos de memoria
+# AGENTS.md: arte/fact0s
 
 Reglas de trabajo del repo. Autoridad: `usuario-en-sesión` > este archivo > `DESIGN.md` (decisiones visuales ya tomadas) > `PLAN.md` (orden de ejecución) > `SKILL.md`.
 
@@ -10,7 +10,7 @@ El vault tiene su propio `AGENTS.md`; este archivo sólo aplica a la carpeta del
 
 ## Qué es esta obra
 
-Seis objetos (El libro quemado, El Pañuelo, La Silueta, Las Tijeras, Los Pájaros, El Vuelo) sobre la dictadura argentina, renderizados como arte ASCII. **La interactividad está en el texto, no en el modelo.** Es un dispositivo de lectura, no un juego: no hay clic, no hay recompensas, no hay partículas.
+Seis objetos (El libro quemado, La silueta, Las tijeras, La televisión, Los pájaros, El vuelo) sobre la dictadura argentina, renderizados como arte ASCII. **La interactividad está en el texto, no en el modelo.** Es un dispositivo de lectura, no un juego: no hay clic, no hay recompensas, no hay partículas.
 
 El texto que se lee es material real: seis citas de poesía, literatura y documentos históricos del período, con procedencia y permiso anotados en `assets/texts/texts.json`. Ese archivo es la **única fuente de verdad**: `server.py` lo inyecta en el documento (`python server.py --bake` persiste el HTML estático en disco) para que el texto exista aunque no haya JavaScript ni servidor activo.
 
@@ -111,8 +111,8 @@ python server.py               # sirve en :8000
 
 ## Herramientas
 
-Todas usan el Chromium que ya trae Playwright en la máquina
-(`C:\Users\Usuario\AppData\Local\ms-playwright\chromium-1248`); no piden npm
+Todas usan el Chrome instalado en la máquina
+(`C:\Users\Usuario\AppData\Local\Google\Chrome\Application\chrome.exe`); no piden npm
 ni instalación. El servidor tiene que estar corriendo en el puerto 8011 para
 las que hablan con la página.
 

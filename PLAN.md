@@ -2,270 +2,189 @@
 type: registro
 ---
 
-# PLAN: Artefactos de memoria
+# PLAN: arte/fact0s
 
-Plan de ejecución para llevar el proyecto a su estado final. Por etapas, con verificación entre etapas: **ninguna etapa se da por cerrada sin evidencia ejecutada**.
+Qué hay que hacer para que la obra quede lista, en orden. Todo marcado: no queda nada abierto.
 
-Estado: Etapas 0, 1, 2, 3, 4 y 5 (Auditoría integral `/antislop`) cerradas. La obra se entrega con sus créditos, sus criterios de validación y su registro en el vault.
+Catálogo vigente: `book`, `silhouette`, `scissors`, `tv`, `birds`, `flight`. Donde una etapa vieja dice `scarf`/pañuelo, léase `tv`/televisión.
 
-El diseño y la interacción ya están decididos y documentados en `DESIGN.md`; este documento no los re-discute, los ejecuta. Las reglas del repo están en `AGENTS.md`.
-
----
-
-## 0. Principio rector y sus consecuencias técnicas
-
-La obra es un dispositivo de lectura sobre la dictadura. La interactividad vive en el texto; el objeto es la superficie donde el texto se inscribe.
-
-Tres consecuencias que gobiernan todo lo demás:
-
-1. **El scroll es el único verbo con estado.** No hay clic, no hay toggle, no hay botón. El estado de cada pieza es `f(p)`, donde `p` es el progreso local de la sección.
-2. **El texto real es el contenido.** La columna de lectura tiene el texto completo en el DOM desde el primer render; la capa ASCII es la inscripción.
-3. **Ninguna recompensa por interactuar.** Sin hover con glow, sin contadores, sin "revelá el secreto". Si algo se puede tocar, es porque carga información.
+El diseño y la interacción están en `DESIGN.md`. Las reglas del repo están en `AGENTS.md`.
 
 ---
 
-## Etapa 0 — Herramienta y cadena de build · CERRADA
+## [x] Etapa 0 — Que la herramienta ande
 
-**Objetivo:** que `glyphcss` entre al proyecto sin CDN y sin obligar a instalar nada para ver la obra.
+Que `glyphcss` entre al proyecto sin CDN y sin obligar a instalar nada para ver la obra.
 
-| # | Tarea | Archivo | Hecho |
-|---|---|---|---|
-| 0.1 | Instalar `glyphcss@0.3.1` como dependencia | `package.json` | ✔ |
-| 0.2 | Empaquetar `three`, `motion`, `glyphcss` en un bundle ESM por vendor | `build.mjs` | ✔ |
-| 0.3 | Declarar `glyphcss` en el importmap del documento | `index.html` | ✔ |
-| 0.4 | `vendor/glyphcss.js` commiteado (777 KB) | `vendor/` | ✔ |
-| 0.5 | Publicar `Newsreader` (OFL) para la columna de lectura | `assets/fonts/` | ✔ |
+- [x] Instalar `glyphcss@0.3.1` (`package.json`)
+- [x] Empaquetar `three`, `motion`, `glyphcss` por vendor (`build.mjs`)
+- [x] Declarar `glyphcss` en el importmap (`index.html`)
+- [x] `vendor/glyphcss.js` commiteado
+- [x] Publicar `Newsreader` para la lectura (`assets/fonts/`)
 
-**Verificación:** `GET /vendor/glyphcss.js` → 200; la página carga sin errores de consola.
-
-**Trampa documentada:** `npm install` **no funciona en `G:`** — el drive deja los archivos de tar en 0 bytes. El toolchain se instala en disco local (`C:\Users\Usuario\AppData\Local\Temp\opencode\artefactos-build`) y sólo se copia `vendor/*.js` de vuelta. `vendor/` va commiteado: la obra tiene que abrirse sin npm.
+Ojo: `npm install` no anda en `G:`. El toolchain se instala en disco local y se copia solo `vendor/*.js`. `vendor/` va commiteado.
 
 ---
 
-## Etapa 1 — El pipeline de render · CERRADA
+## [x] Etapa 1 — Que una pieza se vea de punta a punta
 
-**Objetivo:** que una pieza se renderice de punta a punta con glyphcss, con el texto esculpido sobre la silueta.
+- [x] Conversor Three.js → `Polygon[]` (`src/geometry.js`)
+- [x] Mapeo de ejes Y-up → Z-up (`src/geometry.js`)
+- [x] Centrado del objeto en el origen (`src/geometry.js`)
+- [x] Escena glyphcss: grilla, esculpido, encuadre (`src/glyph-stage.js`)
+- [x] Esculpido del texto sobre las celdas ocupadas (`src/glyph-stage.js`)
+- [x] Medición de la celda tras `document.fonts.ready` (`src/main.js`)
+- [x] Columna de lectura con el texto en el DOM (`index.html`, `style.css`)
+- [x] Sistema visual completo (`style.css`)
 
-| # | Tarea | Archivo | Hecho |
-|---|---|---|---|
-| 1.1 | Conversor Three.js → `Polygon[]` con color por cara | `src/geometry.js` | ✔ |
-| 1.2 | Mapeo de ejes Y-up → Z-up | `src/geometry.js` | ✔ |
-| 1.3 | Centrado del objeto en el origen | `src/geometry.js` | ✔ |
-| 1.4 | Escena glyphcss: grilla, esculpido, encuadre | `src/glyph-stage.js` | ✔ |
-| 1.5 | Esculpido del texto sobre las celdas ocupadas | `src/glyph-stage.js` | ✔ |
-| 1.6 | Medición del avance real de la celda tras `document.fonts.ready` | `src/main.js` | ✔ |
-| 1.7 | Columna de lectura con el texto en el DOM | `index.html`, `style.css` | ✔ |
-| 1.8 | Sistema visual completo (tokens, tipografía, glow, layout) | `style.css` | ✔ |
+---
 
-**Verificación ejecutada:**
-- El libro produce **19.312 triángulos**, bbox sano (4,0 × 2,8 × 2,0 unidades).
-- La grilla resuelta es 133 × 80; el `<pre>` mide 779,30 × 800 px = exactamente `cols × cellW` (sin desfasaje).
-- El texto esculpido aparece en las celdas ocupadas: el dump del DOM muestra el párrafo en español repetido sobre la silueta.
-- Consola del navegador limpia; sin 404.
+## [x] Etapa 2 — Que las seis piezas se lean
 
-**Fallos encontrados y resueltos (no volver a tropezar):**
+### [x] Encuadre y silueta de cada pieza
 
-| Síntoma | Causa | Resolución |
+Cada pieza se vuelca a texto plano y se ajusta la pose hasta que se lee sola. Herramientas: `dump-pose`, `dump-sweep`, `find-pose`, `shot`, `shot-at`, `silhouette-bbox`.
+
+| Pieza | Pose | Por qué |
 |---|---|---|
-| La página salía sin CSS ni modelos | Los archivos en disco se llamaban `… (1).js` / `style (1).css` | Renombrados 14 archivos |
-| Trama a 20 px en vez de 10 | El CSS de glyphcss (`.glyph-scene .glyph-output`, especificidad 0,2,0) le ganaba a `.glyph-output` | Usar el selector `.glyph-scene .glyph-output` |
-| Objeto al revés | El mapeo `(x, z, y)` es una reflexión (det −1): invierte las normales | Rotación `(x, −z, y)` |
-| Trama que hierve de rayas | Las 9 hojas del libro están a menos de una celda de distancia | `depthEpsilon: 0.02` + `supersample: 2` |
-| Franja vertical en el borde derecho | Falsa alarma: era el `\r` del fin de línea en el DOM | Ninguna: el `<pre>` está bien dimensionado |
-| El objeto se salía de cuadro | No estaba centrado en el origen y el fit miraba sólo el ancho | `center()` en el conversor + fit en ambos ejes |
+| book | 70 / 90 | El lomo al medio, las dos tapas separadas |
+| silhouette | 80 / 90 | La persona de frente, completa |
+| scissors | 60 / 30 | Las dos hojas abiertas en diagonal |
+| tv | 90 / 270 | La pantalla de frente |
+| birds | 86 / 90 | La formación entera |
+| flight | 26 / 55 | Fuselaje y ala de perfil |
 
-**Limitación abierta:** la silueta del libro todavía se lee como masa y no como libro abierto. La causa está identificada (ver Etapa 2.1) y **no** es un fallo del pipeline.
+### [x] Los seis modelos
 
----
-
-## Etapa 2 — Legibilidad y las seis piezas · CERRADA
-
-**Objetivo:** que las seis piezas se lean como lo que son, con su estado propio, y que el scroll recorra la obra.
-
-### 2.1 Encuadre y silueta de cada pieza · CERRADA
-
-**Diagnóstico original:** el modelo del libro apila **nueve hojas planas** separadas 0,032 unidades (≈0,65 celdas a zoom 120). Vista desde arriba o de frente, la hoja superior tapa a las demás y la forma se aplana en una masa: la lectura de "libro abierto" del renderer viejo venía de la luminancia de un render WebGL con luz de estudio, no de la geometría.
-
-**Lo que se hizo:** se tomaron las opciones **A + C**. Las hojas quedaron separadas 0,05 unidades (una celda) y la bisagra del lomo se abrió a 0,52 radianes: con las tapas casi planas, la hoja de arriba tapaba a las demás. Las poses se calibraron por silueta, no por gusto.
-
-**Método de trabajo por pieza:** volcar la silueta a texto plano (el `<pre>` del DOM, con `\r` eliminado) y leerla como una imagen; ajustar pose hasta que la silueta se lea. Quedaron como herramientas del repo:
-
-| Herramienta | Qué hace |
-|---|---|
-| `tools/dump-pose.mjs` | Vuelca la silueta de una pieza con una pose concreta, como texto plano |
-| `tools/dump-sweep.mjs` | Barre varias poses de una pieza y mide ancho, alto y filas partidas |
-| `tools/find-pose.mjs` | Barre la grilla de poses y ordena por partedura: una pieza que se parte en dos lóbulos es la que se lee |
-| `tools/shot.mjs` / `tools/shot-at.mjs` | Captura la obra en imagen, para leerla como se ve y no como máscara de hashes |
-| `tools/silhouette-bbox.mjs` | Caja envolvente de la silueta y grilla resuelta |
-
-**Criterio de cierre por pieza:** la silueta se identifica sin contexto en tres segundos, y a 200 % de zoom el texto sigue siendo la superficie, no un mosaico.
-
-**Poses resultantes** (`POSES` en `src/main.js`, rotX/rotY en grados):
-
-| Pieza | rotX | rotY | Por qué |
-|---|---|---|---|
-| book | 70 | 90 | El lomo queda al medio y las dos tapas se leen separadas |
-| scarf | 20 | 30 | De tres cuartos: se ve la cabeza y el nudo |
-| silhouette | 80 | 90 | La persona, de frente y completa |
-| scissors | 60 | 30 | Las dos hojas abiertas se leen en diagonal |
-| birds | 40 | 0 | La formación se ve entera |
-| flight | 20 | 30 | El fuselaje y el ala se leen de perfil |
-
-**Trampa encontrada:** el encuadre se mide sobre la grilla **resuelta**. Si se mide antes del `resize`, la grilla es la de 80×24 del default de glyphcss y la pieza queda diminuta.
-
-### 2.2 Los seis modelos · CERRADA
-
-Los seis modelos son ahora funciones puras del progreso: `update(p)` con un único número, sin estado interno, sin `toggle()` y sin movimiento dependiente del reloj.
+Cada uno es `update(p)`: una función del progreso, sin estado interno ni partículas.
 
 | Pieza | p=0 | p=1 |
 |---|---|---|
-| book | libro intacto | quemado: las hojas de arriba se carbonizan, se encogen y se levantan |
-| scarf | anudado en la cabeza | desplegado en el triángulo, con las puntas guardadas en el pliegue |
-| silhouette | figura entera | la figura sale del encuadre hacia arriba; los relieves se ocultan |
-| scissors | tijeras abiertas, película entera | tijeras cerradas y película cortada en dos |
-| birds | pájaros libres | la jaula crece y se cierra sobre ellos |
+| book | intacto | quemado, hojas carbonizadas |
+| silhouette | figura entera | se borra en el sitio |
+| scissors | abiertas, película entera | cerradas, película cortada |
+| tv | pantalla nítida | estática creciente |
+| birds | libres | la jaula se cierra |
 | flight | rampa cerrada | rampa abajo |
 
-- [x] Convertir cada uno y calibrar su pose (`POSES` en `src/main.js`).
-- [x] Decidir el estado de cada pieza en función de `p`.
-- [x] Borrar de los modelos los sistemas de partículas (fuego y brasas del libro).
-- [x] Quitar de los modelos los `toggle()`.
+- [x] Convertir cada uno y calibrar su pose (`src/main.js`)
+- [x] Decidir el estado de cada pieza en función de `p`
+- [x] Borrar los sistemas de partículas
+- [x] Quitar los `toggle()`
 
-**Trampa encontrada:** el pañuelo se leía como una lámina informe. El modelo anterior era una superficie paramétrica sin volumen; se rehízo como tela que envuelve una cabeza y se despliega en el triángulo. La caja del triángulo y la de la tela anudada tienen que ser casi la misma: si no, la pieza se sale de cuadro al desenlazarse.
+### [x] Scroll continuo
 
-### 2.3 Scroll continuo · CERRADA
+- [x] Secciones de 150 vh por pieza
+- [x] `p` sale del scroll de cada sección
+- [x] Estado amortiguado, sin saltos
+- [x] Estado congelado en los bordes de cada pieza
+- [x] Parallax leve del objeto
+- [x] La columna de lectura no se anima
+- [x] Teclado: flechas saltan de pieza en pieza
 
-- [x] Secciones de 150 vh por pieza, con 80 vh al cierre.
-- [x] `p = clamp((scrollY − top) / (alto − viewport), 0, 1)`.
-- [x] Estado amortiguado: `state += (target − state) · (1 − e^(−dt·5))`, con `dt` clampeado a 1/20 s.
-- [x] El estado se congela fuera de `[0.05, 0.85]`.
-- [x] Parallax del objeto entre −3 % y +3 %.
-- [x] La columna de lectura **no** se anima.
-- [x] Teclado: `ArrowRight`/`ArrowLeft` saltan al inicio de la pieza siguiente/anterior.
+### [x] Rotación
 
-**Verificación ejecutada** (`tools/cdp.mjs scroll all`): las seis piezas aparecen en orden, cada una recorre su estado de 0 a 1 y vuelve a 0 al bajar; la columna muestra la cita de la pieza activa; la consola queda limpia.
+- [x] Arrastre gira la pieza, sin rebote
+- [x] La rotación queda donde quedó
+- [x] En táctil el dedo vertical scrollea y el horizontal gira
+- [x] Cursor `grab` / `grabbing`
 
-**Sin JS:** las secciones se apilan como documento. La clase `.js` en `<html>` decide los 150 vh.
+### [x] El texto
 
-### 2.4 Rotación · CERRADA
+- [x] Seis citas reales (`assets/texts/texts.json`)
+- [x] Máximo 4 versos o 40 palabras por cita
+- [x] Bloque legible e inscripción salen del mismo texto
+- [x] `server.py` sirve el corpus como archivo estático
+- [x] Borrados `poems.json` y `src/poetry.js`
 
-- [x] Arrastre sobre el escenario: rotación libre (yaw sin tope, pitch ±90°), sin rebote. La Etapa 4 sacó los topes.
-- [x] La rotación se queda donde quedó.
-- [x] `touch-action: pan-y` en el escenario.
-- [x] `cursor: grab` / `grabbing`.
-
-### 2.5 El texto · CERRADA
-
-- [x] `assets/texts/texts.json`: seis citas reales con `id`, `piece`, `author`, `work`, `year`, `excerpt`, `source`, `license`.
-- [x] Máximo 4 versos o 40 palabras por cita.
-- [x] El bloque legible y la inscripción salen del **mismo** `excerpt`.
-- [x] `server.py` sirve el corpus como archivo estático: no hay API, ni descarga remota, ni `refresh()`.
-- [x] Borrados `assets/texts/poems.json` y `src/poetry.js`.
-
-**Citas verificadas** (texto literal leído en la fuente, con URL y estado de permiso, pertinentes a cada artefacto):
-
-| Pieza | Autor | Obra | Año | Fuente de verificación |
-|---|---|---|---|---|
-| El libro quemado | Juan Gelman | Bajo la lluvia ajena | 1980 | Material de Lectura, UNAM, sección III |
-| El pañuelo | Juan Gelman / CONADEP | Hacia el sur / Nunca Más | 1982 / 1984 | Material de Lectura, UNAM («Otras partes») / Informe CONADEP |
-| La silueta | Rodolfo Walsh | Carta Abierta de un Escritor a la Junta Militar | 1977 | CELS, sección 2 |
-| Las tijeras | María Elena Walsh | Desventuras en el País-Jardín-de-Infantes | 1979 | Clarín, 16 de agosto de 1979 |
-| Los pájaros | Francisco Urondo | Poemas póstumos (Solicitaciones) | 1973 | La patria fusilada / Poemas póstumos |
-| El vuelo | Néstor Perlongher | Cadáveres | 1984 | Revista Sitio N° 4 / Prosa plebeya |
-
-Los créditos con la procedencia se arman solos desde el corpus (`#credits` en `index.html`).
-
----
-
-## Etapa 5: Auditoría integral `/antislop`, monocromo WCAG AA y accesibilidad · CERRADA
-
-Revisión integral ejecutada el 27/10/2026 bajo reglas estrictas `/antislop`:
-
-| # | Intervención | Archivos | Hecho |
+| Pieza | Autor | Obra | Año |
 |---|---|---|---|
-| 5.1 | Corpus de 6 citas únicas y pertinentes por pieza + pre-horneado (`--bake`) y escape HTML (`html.escape`) | `assets/texts/texts.json`, `server.py`, `index.html` | ✔ |
-| 5.2 | Esculpido continuo de flujo de caracteres (`leakedAsciiCount = 0`) y encuadre multi-estado (`fitMultiState`) | `src/glyph-stage.js` | ✔ |
-| 5.3 | Monocromo de papel cálido (`clampPaperColor`, contraste `>= 5.08:1` en todos los spans) y ámbar `#d99b26` exclusivo para las brasas del libro (`burnCells`) | `src/geometry.js`, `src/models/*.js`, `src/glyph-stage.js` | ✔ |
-| 5.4 | Reconstrucción del pañuelo (`scarf.js`), corrección del bug booleano de `silhouette.js` (`reliefs = p < .68`) y optimización de geometrías (`birds`: 24.080 -> 6.128 tris; `scissors`: 2.056 tris; `flight`: 1.464 tris) | `src/models/scarf.js`, `src/models/silhouette.js`, `src/models/birds.js`, `src/models/scissors.js`, `src/models/flight.js` | ✔ |
-| 5.5 | Secciones `00 Umbral` (`<h1>Artefactos de memoria</h1>`), `.skip-link`, `.copyright-notice`, `@property --glow`, navegación por teclado (`ArrowLeft`/`ArrowRight` y `Shift + Flechas` para rotar) y layout mobile sin solapamiento (`375x812`) | `index.html`, `style.css`, `src/main.js`, `package.json`, `build.mjs` | ✔ |
+| El libro quemado | Juan Gelman | Bajo la lluvia ajena | 1980 |
+| La silueta | Rodolfo Walsh | Carta Abierta… | 1977 |
+| Las tijeras | María Elena Walsh | Desventuras en el País-Jardín-de-Infantes | 1979 |
+| La televisión | Rodolfo Walsh | Carta Abierta… | 1977 |
+| Los pájaros | Paco Urondo | Poemas de la cárcel | 1973 |
+| El vuelo | Néstor Perlongher | Cadáveres | 1984 |
 
 ---
 
-## Etapa 3 — Cierre, créditos y entrega · CERRADA
+## [x] Etapa 3 — Cierre, créditos y entrega
 
-- [x] Sección de **Créditos y fuentes**: por cita, autor, obra, edición o URL, año, estado de permiso. Después, licencias de código y tipografía, el contexto histórico consultado y la aclaración de que los modelos son representaciones y no levantamientos técnicos. El colofón es la última sección del scroll (80 vh), no una página aparte: el recorrido no se alarga.
-- [x] `docs/FUENTES.md` absorbido en los créditos y borrado. Las fuentes viven en la obra, una sola vez.
-- [x] `README.md` al día: cómo abrir, cómo reconstruir `vendor/`, dónde están las fuentes.
-- [x] `src/ascii.js` y `src/input.js` (renderer e input viejos): borrados en la Etapa 1.
-- [x] `docs/PLAN.md`, `docs/VALIDACION.md` y `docs/validacion.json` describían el pipeline WebGL: borrados. Los criterios de la obra nueva están en `docs/VALIDACION.md`, con la evidencia de cada uno. `validacion.json` no se rehace: nadie lo lee.
-- [x] Repo de entrega: `git init` dentro de la carpeta del proyecto, con `node_modules/` y `__pycache__/` fuera del índice.
-- [x] Registro en el vault: entrada en `01 - Proyectos/INDEX.md` y commit en el repo del vault.
+- [x] Créditos y fuentes como cierre del scroll
+- [x] `docs/FUENTES.md` absorbido en la obra
+- [x] `README.md` al día
+- [x] Borrados renderer e input viejos
+- [x] Borrados planes y validaciones del pipeline viejo
+- [x] Repo de entrega con `node_modules/` y `__pycache__/` afuera
+- [x] Registro en el vault
 
-**Arreglo de la entrega:** al final del recorrido, el colofón se leía sobre el libro. La pieza activa era "la sección que contiene el centro de la ventana", y el cierre no es una sección: al llegar al final, ninguna lo contenía y el escenario volvía a la primera pieza. Ahora la pieza activa es la última que ya pasó por el centro, así que el cierre queda sobre El vuelo.
+Accesibilidad:
 
-**Trampa nueva:** el perfil de Chromium de `tools/cdp.mjs` es persistente, así que la verificación podía medir un módulo viejo del cache en vez del archivo del disco. La herramienta desactiva la caché por CDP.
+- [x] Todo el texto en el DOM desde el primer render
+- [x] La capa ASCII lleva `aria-hidden="true"`
+- [x] Sin JS las secciones se apilan como documento
+- [x] Foco visible siempre
+- [x] Movimiento reducido: estado crudo, sin parallax, sin inercia
 
-### Accesibilidad (checklist de cierre)
+Rendimiento:
 
-- [x] Todo el texto existe en el DOM desde el primer render; `Ctrl+F` y el lector de pantalla funcionan sin JS.
-- [x] La capa ASCII lleva `aria-hidden="true"`.
-- [x] Sin JS, las secciones se apilan como documento.
-- [x] Foco visible: `outline: 2px solid #d99b26; outline-offset: 3px`. Ningún `outline: none`.
-- [x] `prefers-reduced-motion`: `p` crudo sin amortiguación, parallax en cero, arrastre sin inercia, estados en 4 escalones, `--glow` fijo.
-
-Evidencia y límites en `docs/VALIDACION.md`. Lo que no se verificó: la obra en un teléfono real (sólo viewport simulado) y la lectura con lector de pantalla (sólo DOM y `aria-hidden`).
-
-### Rendimiento
-
-- [x] Un solo nodo de texto para la capa esculpida: la librería escribe en un único `<pre>`, sin spans por celda.
-- [x] `--glow` se actualiza **sólo** en los umbrales de estado, no por frame.
-- [x] El estado se recalcula sólo si cambió `p` o hubo arrastre.
-- [x] Por encima de ~25.000 glifos, celda de 8 × 12 px en vez de 6 × 10. No aplica con la grilla actual: 2.957 glifos (133 × 74). Queda como regla si la obra crece.
+- [x] Un solo nodo de texto para la capa esculpida
+- [x] `--glow` cambia solo en umbrales
+- [x] Estado solo si cambió `p` o hubo arrastre
 
 ---
 
-## Etapa 4 — Lectura, fuego y fluidez · CERRADA
+## [x] Etapa 4 — Lectura, fuego y fluidez
 
-Cambio pedido por el autor el 22/10/2026, después de ver la obra: el scroll se felt trabado, los modelos no se quemaban ni se borraban, el pañuelo no se leía como pañuelo, la inscripción era ruido y el texto de la trama chico.
-
-| # | Cambio | Archivo | Hecho |
-|---|---|---|---|
-| 4.1 | Inscripción con palabras separadas por `·` y un verso por fila | `src/glyph-stage.js` | ✔ |
-| 4.2 | Trama de celda de 14 px (grilla resuelta 95 × 53) | `style.css`, `src/main.js` | ✔ |
-| 4.3 | Fuego de glifos: frente de llama y ceniza, sin partículas | `src/glyph-stage.js`, `src/models/book.js` | ✔ |
-| 4.4 | El libro se quema de verdad: intacto → frente de fuego → carbonizado, hoja por hoja | `src/models/book.js` | ✔ |
-| 4.5 | La silueta se borra de a poco, en el sitio: ya no sale del encuadre | `src/models/silhouette.js` | ✔ |
-| 4.6 | El pañuelo se lee: capucha sobre la cabeza, nudo, dos puntas; y se despliega en el triángulo | `src/models/scarf.js` | ✔ |
-| 4.7 | La inscripción del pañuelo es «NUNCA MÁS», con su procedencia en el corpus | `assets/texts/texts.json` | ✔ |
-| 4.8 | Rotación libre: yaw sin tope, pitch ±90° | `src/main.js` | ✔ |
-| 4.9 | Scroll: medidas cacheadas, sin lecturas de layout por cuadro, umbral de reconstrucción 0,018, malla del libro de 18 × 14 | `src/main.js`, `src/models/book.js` | ✔ |
-| 4.10 | Colofón limpio: sin licencias ni contexto histórico. Las licencias quedan en `LICENSE.md` | `index.html`, `LICENSE.md` | ✔ |
-
-**Verificación:** conversión del libro 15,9 → 8,3 ms; raster 8,8 → 5,7 ms; 59 fps en scroll continuo; grilla 95 × 53. La silueta a p=1 ocupa 3 × 1 celdas (antes era una figura entera). El pañuelo a p=1 se lee como triángulo con el vértice arriba.
-
-**Bugs de fondo que aparecieron en el camino (no volver a tropezar):**
-
-| Síntoma | Causa | Resolución |
-|---|---|---|
-| La obra se veía sin citas cuando la URL traía `?piece=…` | `server.py` comparaba el path completo, con query included | `urlparse(self.path).path` antes de decidir |
-| Al recargar, la pieza no correspondía al scroll | Las secciones se medían con `getBoundingClientRect` + `scrollY`, y el navegador restaura el scroll | Medir con `offsetTop` |
-| La verificación medía un camino que nadie ve | El headless reporta `prefers-reduced-motion: reduce` | `Emulation.setEmulatedMedia` con `no-preference` |
-| Las capturas salían con el texto viejo | Perfil de Chromium persistente con caché | Caché desactivada por CDP y perfil nuevo por corrida |
+- [x] Inscripción con palabras separadas por `·`, un verso por fila (`src/glyph-stage.js`)
+- [x] Trama de 14 px (`style.css`, `src/main.js`)
+- [x] Fuego de glifos, sin partículas (`src/glyph-stage.js`, `src/models/book.js`)
+- [x] El libro se quema hoja por hoja (`src/models/book.js`)
+- [x] La silueta se borra en el sitio (`src/models/silhouette.js`)
+- [x] Rotación libre: yaw sin tope, pitch ±90° (`src/main.js`)
+- [x] Scroll sin lecturas de layout por cuadro (`src/main.js`, `src/models/book.js`)
+- [x] Colofón limpio, licencias en `LICENSE.md` (`index.html`, `LICENSE.md`)
 
 ---
 
+## [x] Etapa 5 — Auditoría `/antislop`
 
-## Riesgos
-
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|---|---|---|---|
-| La silueta de las piezas no se lee | Alta | Alto | Etapa 2.1 es la primera tarea y tiene método medible (silueta en texto plano) |
-| `glyphcss` es pre-1.0 y puede romper la API | Media | Alto | `vendor/` commiteado: la obra no depende de npm ni de la red en runtime |
-| Citas con copyright sin permiso | Media | Alto (legal y ético) | Citas breves con procedencia y aviso; el aviso de copyright va una vez, al pie |
-| La obra se lee como "juego" | Baja | Muy alto | La prohibition está escrita en `DESIGN.md` §Lo que la obra no hace: sin clic, sin recompensas, sin partículas |
-| El drive `G:` rompe `npm install` | Ya pasó | Medio | Toolchain en disco local; `vendor/` commiteado |
+- [x] Corpus único pre-horneado con escape HTML (`texts.json`, `server.py`, `index.html`)
+- [x] Esculpido continuo y encuadre multi-estado (`src/glyph-stage.js`)
+- [x] Monocromo cálido con piso AA (`src/geometry.js`, `src/models/*`, `src/glyph-stage.js`)
+- [x] Modelos reconstruidos y geometrías livianas (`src/models/*`)
+- [x] Umbral, skip-link, glow, teclado completo y mobile (`index.html`, `style.css`, `src/main.js`)
 
 ---
+
+## [x] Etapa 6 — Entrada y carga
+
+- [x] Título `arte/fact0s` en documento, docs y paquetes (`index.html`, `*.md`, `package.json`, `texts.json`)
+- [x] Loader con barra real y botón Entrar (`index.html`, `style.css`, `src/main.js`)
+- [x] Escenario en negro hasta los 8 px de scroll (`src/main.js`)
+- [x] Herramientas con query saltean el loader; `cdp`/`perf`/`shot-at` entran solas (`tools/*.mjs`)
+
+Verificación 2026-11-18: V1/V4 (6 piezas `0 → 1`, consola limpia), V2 (134 a 194 caracteres), V3 (60,1 fps; 9,6 ms conversión; 5,5 ms raster).
+
+## [x] Etapa 7 — Ajustes de entrada
+
+- [x] Fondo negro al inicio, solo puntos (`src/bg.js`)
+- [x] Libro con la misma rampa que el resto (`src/main.js`)
+- [x] Títulos quietos en reposo (`src/main.js`)
+- [x] Cursor sin reflow (`src/typewriter.js`, `style.css`)
+- [x] Sin redraw perpetuo (`src/main.js`)
+
+Verificación 2026-11-18: `scroll all` en verde.
+
+---
+
+## Cómo se verifica
+
+```sh
+node tools/cdp.mjs scroll all   # recorrido entero, consola limpia
+node tools/verify-nojs.mjs      # texto en el DOM sin JavaScript
+node tools/perf.mjs             # fps, conversión, raster, peor cuadro
+```
 
 ## Decisiones que ya no se re-discuten
 
@@ -274,5 +193,13 @@ Cambio pedido por el autor el 22/10/2026, después de ver la obra: el scroll se 
 - La rotación por arrastre se queda **por ahora**; no hay auto-rotación.
 - Sin clic izquierdo, en ningún lugar.
 - Los textos de Bécquer se borran. El corpus es real.
-- La inscripción del pañuelo es un fragmento del corpus, no "NUNCA MÁS".
+- La inscripción de cada pieza sale de su cita, sin texto aparte.
 - Galería y configuración quedan como **dirección futura** en `DESIGN.md`, no como plan.
+
+## Riesgos
+
+| Riesgo | Mitigación |
+|---|---|
+| Citas con copyright sin permiso | Breves, con procedencia y aviso una vez al pie |
+| `npm install` rompe en `G:` | Toolchain en disco local; `vendor/` commiteado |
+| El drive no versiona la carpeta | Commitear la carpeta como repo de entrega |
