@@ -73,12 +73,12 @@ export class Dissolve {
         span.className = "dz-char";
       } else if (loc < 0.32) {
         
-        const gIdx = Math.floor(hash(i, Math.floor(this.now * 0.006) + 11) * 3);
+        const gIdx = Math.floor(Math.random() * 3);
         span.textContent = ["·", ".", " "][gIdx];
         span.className = "dz-char dz-glitch";
       } else if (loc < 0.88) {
         
-        const gIdx = Math.floor(hash(i, Math.floor(this.now * 0.01) + 23) * GLITCH.length);
+        const gIdx = Math.floor(Math.random() * GLITCH.length);
         span.textContent = GLITCH[gIdx];
         span.className = "dz-char dz-glitch";
       } else {

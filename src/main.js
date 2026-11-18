@@ -253,7 +253,7 @@ function applyPiece(index) {
  document.querySelectorAll('.piece').forEach((el) => el.classList.toggle('is-active', el === section.el));
  current = index;
  section.state = -1;
- damped.delete(section.id);
+ damped.set(section.id, -0.2);
  redraw(performance.now());
 }
 
@@ -263,11 +263,12 @@ function redraw(now) {
  const model = models.get(section.id);
  model.update(Math.max(0, section.state));
  model.frame?.(now);
- model.root.position.y += sm(0.86, 1, clamp(section.state, 0, 1)) * 2.2;
+ const st0 = clamp(section.state, 0, 1);
+ model.root.position.y += sm(0.82, 1, st0) * 6 - (1 - sm(0, 0.12, st0)) * 6;
  stage.setBurn(model.burn ? model.burn(Math.max(0, section.state)) : 0);
  stage.setTvStatic(model.tvStatic ? model.tvStatic(Math.max(0, section.state)) : 0, now);
 	if (model.isSilhouette) {
-		stage.setScatter(sm(0.25, 0.95, section.state));
+		stage.setScatter(sm(0.4, 1.0, section.state));
 	} else {
 		stage.setScatter(0);
 	}
@@ -286,6 +287,7 @@ const FRAME_MS = 16;
 function frame(now) {
  const dt = Math.min(1 / 20, (now - last) / 1000);
  last = now;
+ stage.setTime(now);
  const scrolled = scrollY !== lastScrollY;
  lastScrollY = scrollY;
   const wasSmoothed = smoothed; smoothed = false;

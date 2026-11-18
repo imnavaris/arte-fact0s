@@ -87,11 +87,11 @@ export function createBook(){
   
   const spineGeo=new T.CylinderGeometry(.30,.30,2.14,22,1,false,Math.PI*.48,Math.PI*1.04);
   spineGeo.rotateX(Math.PI/2);
-  part(root,spineGeo,spineMat,[0,-.28,0]);
+  part(root,spineGeo,spineMat,[0,-.10,0]);
   for(const z of [-.82,-.41,0,.41,.82]){
    const rib=new T.CylinderGeometry(.295,.295,.075,18,1,false,Math.PI*.46,Math.PI*1.08);
    rib.rotateX(Math.PI/2);
-   part(root,rib,ribMat,[0,-.28,z]);
+   part(root,rib,ribMat,[0,-.10,z]);
   }
 
   

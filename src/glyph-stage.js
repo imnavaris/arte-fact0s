@@ -1,11 +1,11 @@
 import { createGlyphScene, createGlyphOrthographicCamera } from "glyphcss";
 const CELL_W = 8;
 const CELL_H = 14;
-const FIRE = " .,:;+*xX#%@";
+const FIRE = "^/\\|*+xX#%@";
 const ASH = ".,\x27`";
 const FIRE_MAX = 36;
 const NOISE = " .:-=+*#%@";
-const SMOKE = " .,:;";
+const SMOKE = "\u00b7.:oO\u00b0";
 const TV_BLUE = Array.from({ length: 256 }, (_, q) => {
   const s = Math.round(90 + (q / 255) * 165).toString(16).padStart(2, "0");
   return `#${s}${s}ff`;
@@ -51,6 +51,7 @@ export class GlyphStage {
     this.scatter = 0;
     this.tvStatic = 0;
     this.tvTime = 0;
+    this.nowMs = 0;
     this.extent = null;
     this.gd = null;
     this.heat = null;
@@ -95,6 +96,9 @@ export class GlyphStage {
   }
   setScatter(value) {
     this.scatter = Math.max(0, Math.min(1, value || 0));
+  }
+  setTime(now) {
+    this.nowMs = now || 0;
   }
   setTvStatic(amp, now = 0) {
     this.tvStatic = Math.max(0, Math.min(1, amp || 0));
@@ -201,7 +205,7 @@ export class GlyphStage {
         const h2 = (hash(c + 19, r + 47) % 1000) / 1000;
         const relY = (r - e.minR) / spanR;
         const relEdge = Math.min(1, Math.abs(c - midC) / halfW);
-        const releaseAt = relY * 0.24 + (1 - relEdge) * 0.16 + h1 * 0.14;
+        const releaseAt = relY * 0.3 + (1 - relEdge) * 0.2 + h1 * 0.18;
         if (s <= releaseAt) {
           tempChar[i] = ch;
           if (tempColor && grid.color) tempColor[i] = grid.color[i];
@@ -209,10 +213,10 @@ export class GlyphStage {
           continue;
         }
         const flight = Math.min(1, (s - releaseAt) / Math.max(0.18, 0.92 - releaseAt));
-        const dirX = (c >= midC ? 1 : -1) * (0.35 + relEdge * 0.85) + (h1 - 0.5) * 0.9;
-        const dirY = -0.55 - (1 - relY) * 0.65 + (h2 - 0.5) * 0.7;
-        const dist = Math.pow(flight, 1.35) * maxSpan * (0.65 + 0.65 * h2);
-        const swirl = Math.sin(flight * 6.0 + h1 * 6.28) * 3.5 * flight;
+        const dirX = (c >= midC ? 1 : -1) * (0.15 + relEdge * 0.4) + (h1 - 0.5) * 0.5;
+        const dirY = -0.9 - (1 - relY) * 0.3 + (h2 - 0.5) * 0.4;
+        const dist = Math.pow(flight, 2.2) * maxSpan * (0.3 + 0.4 * h2);
+        const swirl = Math.sin(flight * 6.0 + h1 * 6.28) * 1.5 * flight;
         const nr = Math.round(r + dirY * dist + swirl);
         const nc = Math.round(c + dirX * dist * 1.35 - swirl);
         if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
@@ -286,14 +290,21 @@ export class GlyphStage {
       const frontR = Math.min(botR, topR + Math.round(colBurn * colH));
       const minTongueR = Math.max(0, topR - Math.min(6, Math.ceil(colBurn * 6)));
       const smokeTop = Math.max(0, minTongueR - 10);
+      const drift = Math.floor(this.nowMs * 0.004 + ((hash(c, 7) % 1000) / 1000) * 6) % 12;
+      const sway = Math.round(Math.sin(this.nowMs * 0.002 + c * 0.7) * 2);
       for (let r = smokeTop; r < minTongueR; r++) {
         const si = r * cols + c;
         if (this.occ[si] || grid.char[si] !== ' ') continue;
         const sv = h[si];
         if (sv < 1.5) continue;
         const sq = Math.min(SMOKE.length - 1, ((Math.min(1, sv / 20)) * SMOKE.length) | 0);
-        grid.char[si] = SMOKE[sq];
-        if (grid.color) grid.color[si] = '#57534d';
+        const nr = r - drift;
+        const nc = c + sway;
+        if (nr < smokeTop || nr >= rows || nc < 0 || nc >= cols) continue;
+        const j = nr * cols + nc;
+        if (grid.char[j] !== ' ' || this.occ[j]) continue;
+        grid.char[j] = SMOKE[sq];
+        if (grid.color) grid.color[j] = '#57534d';
       }
       for (let r = minTongueR; r <= frontR; r++) {
         const i = r * cols + c;

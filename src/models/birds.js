@@ -63,9 +63,9 @@ export function createBirds(){
   let curP=0, curT=0;
   function applyState(){
     const p=curP;
-    const open=sm(.05,.4,p);
-    const brk=sm(.42,.72,p);
-    const exit=sm(.74,.96,p);
+    const open=sm(.3,.55,p);
+    const brk=sm(.55,.88,p);
+    const exit=sm(.88,1,p);
     const fall=brk*brk;
     cage.visible=exit<1;
     cage.position.y=-exit*9;

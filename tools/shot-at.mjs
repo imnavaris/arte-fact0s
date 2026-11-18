@@ -54,6 +54,7 @@ const call = (m, p) => send(m, p, sessionId);
 await call('Page.enable');
 await call('Runtime.enable');
 await call('Page.navigate', { url: `http://127.0.0.1:${PORT}/` });
+await sleep(2500);
 await call('Runtime.evaluate', { expression: `(async () => { const L = document.getElementById('loader'); if (!L || L.classList.contains('done')) return 'skip'; const t0 = Date.now(); let b = null; while (Date.now() - t0 < 25000) { b = document.getElementById('enter'); if (b && !b.disabled) break; await new Promise((r) => setTimeout(r, 150)); } if (b && !b.disabled) { b.click(); return 'entered'; } return 'timeout'; })()`, awaitPromise: true, returnByValue: true });
 await sleep(3000);
 
