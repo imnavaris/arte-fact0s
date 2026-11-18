@@ -113,7 +113,7 @@ python server.py               # sirve en :8000
 
 Todas usan el Chrome instalado en la máquina
 (`C:\Users\Usuario\AppData\Local\Google\Chrome\Application\chrome.exe`); no piden npm
-ni instalación. El servidor tiene que estar corriendo en el puerto 8011 para
+ni instalación. El servidor tiene que estar corriendo en el puerto 8000 para
 las que hablan con la página.
 
 | Herramienta | Para qué |

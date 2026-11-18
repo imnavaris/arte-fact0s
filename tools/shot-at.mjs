@@ -5,7 +5,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
-const PORT = process.env.PORT || '8011';
+const PORT = process.env.PORT || '8000';
 const DEBUG_PORT = 9337;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

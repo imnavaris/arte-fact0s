@@ -155,7 +155,7 @@ function stateOf(p) {
 }
 
 
-const stageOpacity = (p) => sm(0.01, 0.15, p) * (1 - sm(0.88, 0.99, p));
+const stageOpacity = (p) => sm(0.01, 0.15, p);
 const titleForm = (p) => sm(0.02, 0.44, p) * (1 - sm(0.86, 0.98, p));
 
 const sections = [...document.querySelectorAll('.piece')].map((el) => ({
@@ -262,6 +262,7 @@ function redraw(now) {
  const model = models.get(section.id);
  model.update(Math.max(0, section.state));
  model.frame?.(now);
+ model.root.position.y += sm(0.86, 1, clamp(section.state, 0, 1)) * 2.2;
  stage.setBurn(model.burn ? model.burn(Math.max(0, section.state)) : 0);
  stage.setTvStatic(model.tvStatic ? model.tvStatic(Math.max(0, section.state)) : 0, now);
 	if (model.isSilhouette) {

@@ -4,7 +4,7 @@
 import { execFileSync } from 'node:child_process';
 
 const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
-const PORT = process.env.PORT || '8011';
+const PORT = process.env.PORT || '8000';
 
 const [piece = 'book', p = '0'] = process.argv.slice(2);
 

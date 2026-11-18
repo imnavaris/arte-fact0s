@@ -27,7 +27,7 @@ Corpus en `assets/texts/texts.json`, única fuente de verdad. Sin `inscription` 
 ```sh
 python server.py              # o iniciar.bat; http://localhost:8000
 python server.py --bake       # hornea citas y créditos en index.html
-python server.py --port 8011  # puerto que esperan las herramientas
+python server.py              # o iniciar.bat; http://localhost:8000 (único servidor, recarga viva)
 ```
 
 `vendor/` commiteado: abre sin npm. `npm install` falla en `G:`; toolchain en disco local.

@@ -77,10 +77,9 @@ export class Typewriter {
   setScroll(p, nowMs, dt) {
     const nowSec = nowMs * 0.001;
     let ratio = 0;
-    if (p <= 0.03) ratio = 0;
-    else if (p <= 0.74) ratio = (p - 0.03) / (0.74 - 0.03);
-    else if (p <= 0.88) ratio = 1;
-    else ratio = Math.max(0, 1 - (p - 0.88) / 0.10);
+    if (p <= 0.3) ratio = 0;
+    else if (p <= 0.75) ratio = (p - 0.3) / (0.75 - 0.3);
+    else ratio = 1;
 
     this.targetT = ratio * this.doneTime;
     const diff = this.targetT - this.curT;
@@ -111,7 +110,7 @@ export class Typewriter {
     const idle = Math.max(0, nowSec - this.lastEventTime);
     
     const lit = active && (idle < 0.4 || (idle - 0.4) % 0.9 > 0.45);
-    const isDone = this.curT >= this.doneTime * 0.96 && p <= 0.88;
+    const isDone = this.curT >= this.doneTime * 0.96 && p <= 0.97;
 
     if (isDone !== this.done) {
       this.done = isDone;
@@ -144,11 +143,14 @@ export class Typewriter {
 
   render(s, showCursor) {
     const parts = s.split("\n");
-    const lastIdx = Math.max(0, Math.min(parts.length - 1, this.spans.length - 1));
+    let live = -1;
+    for (let k = 0; k < this.spans.length; k++) {
+      if ((parts[k] ?? "").length > 0) live = k;
+    }
     for (let k = 0; k < this.spans.length; k++) {
       const txt = parts[k] ?? "";
       this.spans[k].textContent = txt;
-      if (showCursor && k === lastIdx && s.length > 0) {
+      if (showCursor && k === live) {
         const cur = document.createElement("span");
         cur.className = "cursor";
         cur.textContent = CURSOR;

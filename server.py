@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import http.server
 import json
+import time
+import os
 from pathlib import Path
 import argparse
 import urllib.parse
@@ -13,6 +15,7 @@ CITAS_START = '<!--CITAS:START-->'
 CITAS_END = '<!--CITAS:END-->'
 CREDITOS_START = '<!--CREDITOS:START-->'
 CREDITOS_END = '<!--CREDITOS:END-->'
+LIVE_RELOAD = """<script>(()=>{try{const es=new EventSource('/events');es.onmessage=e=>{if(e.data==='reload')location.reload()}}catch(_){}})();</script>"""
 
 
 def extract_url(text):
@@ -128,13 +131,56 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
             return
+        if path == '/events':
+            return self.serve_events()
         if path in ('/', '/index.html'):
             return self.send_index()
         super().do_GET()
 
+    def watch_mtime(self):
+        latest = 0.0
+        for base in ('src', 'assets/texts'):
+            for dirpath, _, filenames in os.walk(ROOT / base):
+                for name in filenames:
+                    try:
+                        mtime = os.path.getmtime(os.path.join(dirpath, name))
+                    except OSError:
+                        continue
+                    if mtime > latest:
+                        latest = mtime
+        for name in ('index.html', 'style.css', 'server.py'):
+            try:
+                mtime = os.path.getmtime(ROOT / name)
+            except OSError:
+                continue
+            if mtime > latest:
+                latest = mtime
+        return latest
+
+    def serve_events(self):
+        baseline = time.time()
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/event-stream')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Connection', 'keep-alive')
+        self.end_headers()
+        try:
+            for _ in range(60):
+                time.sleep(0.5)
+                if self.watch_mtime() > baseline:
+                    self.wfile.write(b'data: reload\n\n')
+                    self.wfile.flush()
+                    return
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
     def send_index(self):
         html_content = (ROOT / 'index.html').read_text(encoding='utf-8')
         html_content = inject_corpus(html_content)
+        if '</body>' in html_content:
+            html_content = html_content.replace('</body>', LIVE_RELOAD + '</body>', 1)
+        else:
+            html_content += LIVE_RELOAD
         body = html_content.encode('utf-8')
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')

@@ -5,6 +5,7 @@ const FIRE = " .,:;+*xX#%@";
 const ASH = ".,\x27`";
 const FIRE_MAX = 36;
 const NOISE = " .:-=+*#%@";
+const SMOKE = " .,:;";
 const TV_BLUE = Array.from({ length: 256 }, (_, q) => {
   const s = Math.round(90 + (q / 255) * 165).toString(16).padStart(2, "0");
   return `#${s}${s}ff`;
@@ -17,7 +18,7 @@ const TV_GRAY = Array.from({ length: 256 }, (_, q) => {
 const lerp = (a, b, t) => a + (b - a) * t;
 const FIRE_COLORS = Array.from({ length: FIRE_MAX + 1 }, (_, h) => {
   const t = h / FIRE_MAX;
-  const stops = [[74, 70, 64], [140, 132, 122], [205, 197, 186], [245, 240, 230], [255, 255, 255]];
+  const stops = [[90, 46, 16], [185, 92, 20], [235, 158, 34], [255, 220, 120], [255, 246, 215]];
   const f = t * (stops.length - 1);
   const i = Math.min(stops.length - 2, Math.floor(f));
   const k = f - i;
@@ -284,9 +285,19 @@ export class GlyphStage {
       const colH = Math.max(1, botR - topR);
       const frontR = Math.min(botR, topR + Math.round(colBurn * colH));
       const minTongueR = Math.max(0, topR - Math.min(3, Math.ceil(colBurn * 3.5)));
+      const smokeTop = Math.max(0, minTongueR - 7);
+      for (let r = smokeTop; r < minTongueR; r++) {
+        const si = r * cols + c;
+        if (this.occ[si] || grid.char[si] !== ' ') continue;
+        const sv = h[si];
+        if (sv < 1.5) continue;
+        const sq = Math.min(SMOKE.length - 1, ((Math.min(1, sv / 20)) * SMOKE.length) | 0);
+        grid.char[si] = SMOKE[sq];
+        if (grid.color) grid.color[si] = '#6f6a63';
+      }
       for (let r = minTongueR; r <= frontR; r++) {
         const i = r * cols + c;
-        if (grid.color[i] === '#d99b26') continue;
+        if (grid.color[i] === '#c0392b') continue;
         const hv = h[i];
         const occupied = this.occ[i] === 1;
         const distToFront = frontR - r;
@@ -304,7 +315,7 @@ export class GlyphStage {
           if (grid.color) grid.color[i] = "#3f3b34";
         } else if (distToFront <= 8 && hv > 4) {
           grid.char[i] = FIRE[Math.min(6, Math.floor((hv / FIRE_MAX) * 7))];
-          if (grid.color) grid.color[i] = "#cfc7b8";
+          if (grid.color) grid.color[i] = "#d99b26";
         } else {
           grid.char[i] = ASH[hash(r, c) % ASH.length];
           if (grid.color) grid.color[i] = "#9e9484";

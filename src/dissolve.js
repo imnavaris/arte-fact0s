@@ -17,6 +17,7 @@ export class Dissolve {
     this.seed = seed;
     this.rawText = el.textContent.trim();
     this.cleanText = this.rawText.toUpperCase();
+    this.chars = [...this.cleanText.replace(/ /g, '')];
     el.setAttribute("aria-label", this.rawText);
     el.textContent = "";
 
@@ -26,11 +27,17 @@ export class Dissolve {
     el.appendChild(this.wrapper);
 
     this.spans = [];
-    for (let i = 0; i < this.cleanText.length; i++) {
-      const s = document.createElement("span");
-      s.className = "dz-char";
-      this.wrapper.appendChild(s);
-      this.spans.push(s);
+    for (const word of this.cleanText.split(' ')) {
+      const wst = document.createElement('span');
+      wst.className = 'dz-word';
+      this.wrapper.appendChild(wst);
+      for (const ch of word) {
+        const s = document.createElement('span');
+        s.className = 'dz-char';
+        wst.appendChild(s);
+        this.spans.push(s);
+      }
+      this.wrapper.appendChild(document.createTextNode(' '));
     }
 
     this.t = -1;
@@ -51,15 +58,11 @@ export class Dissolve {
 
     this.el.style.opacity = String(Math.min(1, t * 1.8));
 
-    const len = this.cleanText.length;
+    const len = this.chars.length;
     for (let i = 0; i < len; i++) {
-      const ch = this.cleanText[i];
+      const ch = this.chars[i];
       const span = this.spans[i];
-      if (ch === " ") {
-        span.innerHTML = "&nbsp;";
-        span.className = "dz-char";
-        continue;
-      }
+      
 
       
       const thr = (i / Math.max(1, len)) * 0.52 + hash(i, this.seed) * 0.22;

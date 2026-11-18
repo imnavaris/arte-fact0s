@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
-const PORT = process.env.PORT || '8011';
+const PORT = process.env.PORT || '8000';
 const outDir = process.argv[2] || '.';
 const p = process.argv[3] ?? '0';
 const width = process.argv[4] || '1440';

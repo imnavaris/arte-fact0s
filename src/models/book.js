@@ -16,8 +16,8 @@ export function createBook(){
   },{roughness:.6,metalness:.08});
 
   const brassMat=mat('#dfd8c8',{roughness:.3,metalness:.4});
-  const ribMat=mat('#d99b26',{roughness:.5,metalness:.15});
-  ribMat.userData.fixedColor='#d99b26';
+  const ribMat=mat('#c0392b',{roughness:.5,metalness:.15});
+  ribMat.userData.fixedColor='#c0392b';
   const spineMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
    g.addColorStop(0,'#b07a1e');g.addColorStop(.5,'#d99b26');g.addColorStop(1,'#b07a1e');
@@ -25,7 +25,7 @@ export function createBook(){
    c.fillStyle='#f5f0e4';
    for(const y of [.14,.32,.5,.68,.86])c.fillRect(0,y*h-4,w,8);
   },{roughness:.55,metalness:.1});
-  spineMat.userData.fixedColor='#d99b26';
+  spineMat.userData.fixedColor='#c0392b';
 
   const pageBlockMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,0);
