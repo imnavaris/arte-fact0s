@@ -110,7 +110,7 @@ export class Typewriter {
     const idle = Math.max(0, nowSec - this.lastEventTime);
     
     const lit = active && (idle < 0.4 || (idle - 0.4) % 0.9 > 0.45);
-    const isDone = this.curT >= this.doneTime * 0.96 && p <= 0.97;
+    const isDone = this.curT >= this.doneTime * 0.99;
 
     if (isDone !== this.done) {
       this.done = isDone;

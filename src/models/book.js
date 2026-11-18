@@ -14,6 +14,7 @@ export function createBook(){
    c.fillStyle=g;c.fillRect(0,0,w,h);
    c.strokeStyle='#dfd8c8';c.lineWidth=12;c.strokeRect(18,18,w-36,h-36);
   },{roughness:.6,metalness:.08});
+  coverMat.userData.fixedColor='#a93226';
 
   const brassMat=mat('#dfd8c8',{roughness:.3,metalness:.4});
   const ribMat=mat('#c0392b',{roughness:.5,metalness:.15});

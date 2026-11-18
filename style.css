@@ -71,15 +71,15 @@ body.entered .bg{opacity:1}
 .piece-title{
  margin:0 0 20px;color:var(--ink);
  font-family:'Newsreader',Georgia,serif;
- font-size:clamp(44px,7vw,84px);line-height:1.08;font-weight:400;
+ font-size:clamp(28px,4vw,44px);line-height:1.15;font-weight:400;
  letter-spacing:0.04em;text-transform:uppercase;
- min-height:90px;opacity:0;
+ min-height:100px;opacity:0;
  text-shadow:0 0 8px var(--bg),0 0 16px rgba(228,225,218,.15);
 }
-.dissolve-art{margin:0;font-family:'Newsreader',Georgia,serif;font-size:clamp(44px,7vw,84px);line-height:1.08;letter-spacing:0.04em;color:var(--ink);user-select:none;display:inline-block}
+.dissolve-art{margin:0;font-family:'Newsreader',Georgia,serif;font-size:clamp(28px,4vw,44px);line-height:1.15;letter-spacing:0.04em;color:var(--ink);user-select:none;display:inline-block}
 .dissolve-art span{display:inline-block}
 .dz-word{white-space:nowrap}
-.dissolve-art .dz-glitch{color:var(--ash);font-family:'Sligoil Micro',var(--mono);font-size:.55em}
+.dissolve-art .dz-glitch{color:var(--ash)}
 .dz{display:inline-block;white-space:pre;will-change:transform,opacity}
 .citation{margin:0}
 .citation p{margin:0 0 20px;font-size:16px;line-height:26px;color:var(--paper);text-shadow:0 0 6px var(--bg),0 0 14px var(--bg)}
@@ -114,8 +114,8 @@ a{color:var(--accent);text-underline-offset:3px}
 }
 @media (max-width:720px){
  :root{--cell-w:6px;--cell-h:10px}
- .piece-title{font-size:34px;line-height:38px;min-height:44px}
- .dissolve-art{font-size:34px;line-height:38px}
+ .piece-title{font-size:30px;line-height:34px;min-height:72px}
+ .dissolve-art{font-size:30px;line-height:34px}
  .citation p{font-size:14px;line-height:22px}
 }
 

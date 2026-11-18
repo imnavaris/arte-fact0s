@@ -284,8 +284,8 @@ export class GlyphStage {
       if (colBurn <= 0.01) continue;
       const colH = Math.max(1, botR - topR);
       const frontR = Math.min(botR, topR + Math.round(colBurn * colH));
-      const minTongueR = Math.max(0, topR - Math.min(3, Math.ceil(colBurn * 3.5)));
-      const smokeTop = Math.max(0, minTongueR - 7);
+      const minTongueR = Math.max(0, topR - Math.min(6, Math.ceil(colBurn * 6)));
+      const smokeTop = Math.max(0, minTongueR - 10);
       for (let r = smokeTop; r < minTongueR; r++) {
         const si = r * cols + c;
         if (this.occ[si] || grid.char[si] !== ' ') continue;
@@ -293,11 +293,11 @@ export class GlyphStage {
         if (sv < 1.5) continue;
         const sq = Math.min(SMOKE.length - 1, ((Math.min(1, sv / 20)) * SMOKE.length) | 0);
         grid.char[si] = SMOKE[sq];
-        if (grid.color) grid.color[si] = '#6f6a63';
+        if (grid.color) grid.color[si] = '#57534d';
       }
       for (let r = minTongueR; r <= frontR; r++) {
         const i = r * cols + c;
-        if (grid.color[i] === '#c0392b') continue;
+        const gc = grid.color[i]; if (gc === '#c0392b' || gc === '#a93226') continue;
         const hv = h[i];
         const occupied = this.occ[i] === 1;
         const distToFront = frontR - r;
@@ -309,11 +309,11 @@ export class GlyphStage {
           continue;
         }
         if (!occupied) continue;
-        if (distToFront <= 4 && hv > 2) {
+        if (distToFront <= 2 && hv > 2) {
           const fIdx = Math.min(FIRE.length - 1, Math.max(2, Math.floor((hv / (FIRE_MAX + 1)) * FIRE.length)));
           grid.char[i] = FIRE[fIdx];
           if (grid.color) grid.color[i] = "#3f3b34";
-        } else if (distToFront <= 8 && hv > 4) {
+        } else if (distToFront <= 9 && hv > 4) {
           grid.char[i] = FIRE[Math.min(6, Math.floor((hv / FIRE_MAX) * 7))];
           if (grid.color) grid.color[i] = "#d99b26";
         } else {
