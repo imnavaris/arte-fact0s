@@ -1,6 +1,6 @@
 import * as T from 'three';
 
-// Convierte un grafo de Three.js (Y-up) a Polygon[] de glyphcss (Z-up).
+
 const SAMPLERS = new WeakMap();
 
 function samplerFor(texture) {
@@ -26,11 +26,11 @@ export function invalidateTexture(texture) { SAMPLERS.delete(texture); }
 
 const hex = (r, g, b) => '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 
-// Escala de blancos y marfiles de alto contraste para despegar del fondo
+
 function clampPaperColor(r, g, b, allowEmber = false) {
  if (allowEmber) return '#d99b26';
  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
- // Piso de brillo elevado a 0.48 y maximo a 1.0 para nitidez absoluta
+ 
  const t = 0.48 + 0.52 * Math.pow(Math.min(1, Math.max(0, lum)), 0.75);
  return hex(Math.round(255 * t), Math.round(250 * t), Math.round(240 * t));
 }

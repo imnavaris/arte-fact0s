@@ -5,7 +5,7 @@ const clamp01=(v)=>v<0?0:v>1?1:v;
 export function createBook(){
   const root=new T.Group();
 
-  // Tapa y contratapa en tonos cálidos de papel y cartón antiguo con marco grabado
+  
   const coverMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w,h);
    g.addColorStop(0,'#9c9486');
@@ -42,7 +42,7 @@ export function createBook(){
    for(let y=26;y<h-26;y+=12)c.fillRect(26,y,w-58-(y%22),2);
   },{roughness:.65,metalness:.02});
 
-  // Ceniza clara legible en tonos cálidos sin negros oscuros
+  
   const charMat=texMat((c,w,h)=>{
    const g=c.createRadialGradient(w*.38,h*.5,10,w*.5,h*.5,w*.7);
    g.addColorStop(0,'#9e9688');
@@ -60,7 +60,7 @@ export function createBook(){
    }
   },{roughness:.8,metalness:.02});
 
-  // Hojas en combustión con el acento ocre/brasa autorizado
+  
   const emberMat=texMat((c,w,h)=>{
    const g=c.createLinearGradient(0,0,w*.3,h);
    g.addColorStop(0,'#d99b26');
@@ -81,7 +81,7 @@ export function createBook(){
 
   const pages=[];
 
-  // Lomo central con costillas de encuadernación
+  
   const spineGeo=new T.CylinderGeometry(.24,.24,2.14,22,1,false,Math.PI*.48,Math.PI*1.04);
   spineGeo.rotateX(Math.PI/2);
   part(root,spineGeo,spineMat,[0,-.42,0]);
@@ -91,14 +91,14 @@ export function createBook(){
    part(root,rib,brassMat,[0,-.42,z]);
   }
 
-  // Mitades del libro articuladas en el eje Z
+  
   for(const sign of [-1,1]){
    const half=new T.Group();
    half.position.set(sign*.14,-.46,0);
    half.rotation.z=-sign*.52;
    root.add(half);
 
-   // Tapa dura con paneles de relieve
+   
    box(half,[1.68,.10,2.14],coverMat,[sign*.84,-.05,0]);
    box(half,[1.40,.045,1.84],coverMat,[sign*.84,-.11,0]);
    box(half,[.52,.055,.66],brassMat,[sign*.84,-.12,0]);
@@ -106,10 +106,10 @@ export function createBook(){
     box(half,[.28,.12,.28],brassMat,[sign*1.55,-.05,cz]);
    }
 
-   // Bloque de páginas sólido
+   
    box(half,[1.56,.20,2.02],pageBlockMat,[sign*.80,.09,0]);
 
-   // Páginas arqueadas optimizadas en 18x14 segmentos
+   
    for(let n=0;n<9;n++){
     const height=.18+n*.05;
     const page=surface(half,18,14,(u,v)=>{

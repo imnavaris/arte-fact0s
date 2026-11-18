@@ -55,7 +55,7 @@ export function createTv() {
     part(g, new T.SphereGeometry(0.075, 8, 6), trimMat, [s * 1.04, 1.6, 0]);
     ants.push({ g, s });
   }
-  // De frente hacia la camara
+  
   root.rotation.set(0.04, 0, 0);
   return {
     root,
