@@ -164,7 +164,7 @@ if (order === 'scroll') {
   
   await evaluate("new Promise(r => { const t0 = Date.now(); const t = setInterval(() => { const o = document.querySelector('.glyph-output'); if ((o && o.textContent.trim().length > 200) || Date.now() - t0 > 8000) { clearInterval(t); r(1); } }, 100); })");
   await sleep(600);
-  const state = await evaluate("[scrollY, window.__artefact0s.stage.lines, document.querySelector('.glyph-output').textContent.replace(/\\s/g,'').slice(0,60), window.__artefact0s.stage.burn, window.__artefact0s.stage.extent, window.__artefact0s.sections.map(s=>+s.state.toFixed(2)), window.__artefact0s.models.get('book').burn(0.5)]");
+  const state = await evaluate("[scrollY, window.__artefact0s.stage.lines, document.querySelector('.glyph-output').textContent.replace(/\\s/g,'').slice(0,60), window.__artefact0s.stage.burn, window.__artefact0s.stage.extent, window.__artefact0s.sections.map(s=>+s.state.toFixed(2)), window.__artefact0s.models.get('libro').burn(0.5)]");
   console.log('ESTADO:', JSON.stringify(state));
   const { data } = await call('Page.captureScreenshot', { format: 'png' });
   writeFileSync(args[0], Buffer.from(data, 'base64'));

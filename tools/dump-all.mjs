@@ -11,7 +11,7 @@ const outDir = process.argv[2] || '.';
 const p = process.argv[3] ?? '0';
 const width = process.argv[4] || '1440';
 const height = process.argv[5] || '900';
-const pieces = ['book', 'silhouette', 'scissors', 'tv', 'birds', 'flight'];
+const pieces = ['libro', 'silueta', 'tijeras', 'tv', 'pajaros', 'vuelo'];
 
 mkdirSync(outDir, { recursive: true });
 

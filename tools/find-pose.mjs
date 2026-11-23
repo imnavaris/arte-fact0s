@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8000';
 
-const [piece = 'book', p = '0'] = process.argv.slice(2);
+const [piece = 'libro', p = '0'] = process.argv.slice(2);
 
 const rxs = [];
 for (let rx = 20; rx <= 120; rx += 20) rxs.push(rx);

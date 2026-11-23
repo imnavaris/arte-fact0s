@@ -3,6 +3,7 @@
 
 
 
+// Glifos del fondo
 const GLYPHS_HEAVY = ['@', '#', 'B', 'W', 'M', 'Q', '8', '&', '%', 'X', 'O', 'Z'];
 const GLYPHS_MID   = ['w', 'q', 'd', 'b', 'k', 'h', 'm', 'p', 'u', 'x', 'z', 'c', 'o', 'a'];
 const GLYPHS_LIGHT = ['1', 'l', 'i', '|', '/', '\\', '{', '}', '[', ']', '?', '!', '+', '*', '-', '='];
@@ -14,7 +15,7 @@ const ALL_CHARS = [
   ...GLYPHS_HEAVY
 ];
 
-const ALPHAS = [0.06, 0.14, 0.26, 0.42];
+const ALPHAS = [0.035, 0.07, 0.12, 0.18];
 const TW = 28;
 const TH = 20;
 
@@ -32,6 +33,7 @@ const sm = (a, b, x) => {
 };
 
 
+// Retrato por celdas
 function personBust(u, v, seed) {
   const headW = 0.32 + 0.04 * hash(seed, 1);
   const headH = 0.40 + 0.04 * hash(seed, 2);
@@ -103,19 +105,35 @@ function personBust(u, v, seed) {
   return lum;
 }
 
+// Fondo vivo
 export function createBackground(canvas) {
   const ctx = canvas.getContext('2d', { alpha: false });
   let cw = 8, ch = 14, dpr = 1, cols = 0, rows = 0, cwp = 8, chp = 14;
   let tilesX = 0, tilesY = 0, numTiles = 0;
   let tileOrder = null, tileRev = null;
-  let mask = null, tileIdx = null;
+  let mask = null;
   let atlas = null;
   const charMap = new Map();
   let prog = 0;
   let lastDrawT = -1e9;
   let drawnProg = -1;
   let dotsLayer = null;
-  let figIdx = null;
+  let breathOf = null;
+  let tileMaxMask = null;
+  let tileCellStart = null;
+  let tileLastQuant = null;
+  let tileDirty = null;
+  let figCount = 0;
+  let figCellR = null;
+  let figCellC = null;
+  let figCellMask = null;
+  let figCellTile = null;
+  let figCellHeavy = null;
+  let figCellMid = null;
+  let figCellLight = null;
+  let glitchBuckets = null;
+  let lastGlitchMod = -1;
+  let heavyCharIdxs = null;
 
   function buildAtlas() {
     atlas = document.createElement('canvas');
@@ -134,6 +152,24 @@ export function createBackground(canvas) {
         actx.fillText(ch, (cIdx + 0.5) * cwp, y + chp * 0.5);
       });
     });
+    heavyCharIdxs = Uint8Array.from(GLYPHS_HEAVY, (ch) => charMap.get(ch) || 0);
+  }
+
+  function getGlitchBucket(gMod) {
+    let bucket = glitchBuckets[gMod];
+    if (bucket) return bucket;
+    const idxs = [];
+    const gChars = [];
+    for (let k = 0; k < figCount; k++) {
+      const rSeed = hash(figCellC[k], figCellR[k], gMod);
+      if (rSeed > 0.985) {
+        idxs.push(k);
+        gChars.push(heavyCharIdxs[Math.floor(rSeed * heavyCharIdxs.length)]);
+      }
+    }
+    bucket = { idx: new Int32Array(idxs), gChar: new Uint8Array(gChars) };
+    glitchBuckets[gMod] = bucket;
+    return bucket;
   }
 
   function resize(w, h, cellW = 8, cellH = 14) {
@@ -153,6 +189,15 @@ export function createBackground(canvas) {
 
     tileOrder = new Float32Array(numTiles);
     tileRev = new Float32Array(numTiles);
+    breathOf = new Float32Array(numTiles);
+    tileMaxMask = new Float32Array(numTiles);
+    tileCellStart = new Int32Array(numTiles + 1);
+    tileLastQuant = new Int32Array(numTiles);
+    tileDirty = new Uint8Array(numTiles);
+    glitchBuckets = new Array(97).fill(null);
+    lastGlitchMod = -1;
+    lastDrawT = -1e9;
+    drawnProg = -1;
 
     for (let t = 0; t < numTiles; t++) {
       tileOrder[t] = hash(t, 77);
@@ -160,20 +205,23 @@ export function createBackground(canvas) {
 
     const total = cols * rows;
     mask = new Float32Array(total);
-    tileIdx = new Int32Array(total);
+    const tileCounts = new Int32Array(numTiles);
 
     for (let r = 0; r < rows; r++) {
+      const ty = Math.floor(r / TH);
+      const v = ((r % TH) / (TH - 1)) * 2 - 1;
       for (let c = 0; c < cols; c++) {
         const i = r * cols + c;
         const tx = Math.floor(c / TW);
-        const ty = Math.floor(r / TH);
         const t = ty * tilesX + tx;
-        tileIdx[i] = t;
-
         const u = ((c % TW) / (TW - 1)) * 2 - 1;
-        const v = ((r % TH) / (TH - 1)) * 2 - 1;
         const seed = (tx * 73856093) ^ (ty * 19349663);
-        mask[i] = personBust(u, v, seed);
+        const m = personBust(u, v, seed);
+        mask[i] = m;
+        if (m >= 0.09) {
+          tileCounts[t]++;
+          if (m > tileMaxMask[t]) tileMaxMask[t] = m;
+        }
       }
     }
 
@@ -183,27 +231,61 @@ export function createBackground(canvas) {
     dotsLayer = document.createElement('canvas');
     dotsLayer.width = canvas.width;
     dotsLayer.height = canvas.height;
-    const dctx = dotsLayer.getContext('2d');
+    const dctx = dotsLayer.getContext('2d', { alpha: false });
+    dctx.fillStyle = '#050608';
+    dctx.fillRect(0, 0, canvas.width, canvas.height);
     const dotIdx = charMap.get('.') || 1;
-    const figs = [];
+    let totalFigs = 0;
+    for (let t = 0; t < numTiles; t++) {
+      tileCellStart[t] = totalFigs;
+      totalFigs += tileCounts[t];
+    }
+    tileCellStart[numTiles] = totalFigs;
+    figCount = totalFigs;
+
+    figCellR = new Int16Array(totalFigs);
+    figCellC = new Int16Array(totalFigs);
+    figCellMask = new Float32Array(totalFigs);
+    figCellTile = new Int32Array(totalFigs);
+    figCellHeavy = new Uint8Array(totalFigs);
+    figCellMid = new Uint8Array(totalFigs);
+    figCellLight = new Uint8Array(totalFigs);
+
+    const tileCursor = tileCellStart.slice(0, numTiles);
+    const midIdxs = Uint8Array.from(GLYPHS_MID, (ch) => charMap.get(ch) || dotIdx);
+    const lightIdxs = Uint8Array.from(GLYPHS_LIGHT, (ch) => charMap.get(ch) || dotIdx);
+
     for (let r = 0; r < rows; r++) {
+      const ty = Math.floor(r / TH);
       for (let c = 0; c < cols; c++) {
         const i = r * cols + c;
-        if (mask[i] < 0.09) {
-          if (r % 2 === 0 && c % 3 === 0) dctx.drawImage(atlas, dotIdx * cwp, 0, cwp, chp, c * cwp, r * chp, cwp, chp);
-        } else figs.push(i);
+        const m = mask[i];
+        if (m < 0.09) {
+          if (r % 2 === 0 && c % 3 === 0) {
+            dctx.drawImage(atlas, dotIdx * cwp, 0, cwp, chp, c * cwp, r * chp, cwp, chp);
+          }
+        } else {
+          const tx = Math.floor(c / TW);
+          const t = ty * tilesX + tx;
+          const pos = tileCursor[t]++;
+          figCellR[pos] = r;
+          figCellC[pos] = c;
+          figCellMask[pos] = m;
+          figCellTile[pos] = t;
+          figCellHeavy[pos] = heavyCharIdxs[Math.floor(hash(c, r, 1) * heavyCharIdxs.length)];
+          figCellMid[pos] = midIdxs[Math.floor(hash(c, r, 2) * midIdxs.length)];
+          figCellLight[pos] = lightIdxs[Math.floor(hash(c, r, 3) * lightIdxs.length)];
+        }
       }
     }
-    figIdx = new Int32Array(figs);
+    ctx.drawImage(dotsLayer, 0, 0);
   }
 
   function setProgress(p) {
     prog = clamp(p, 0, 1);
     for (let t = 0; t < numTiles; t++) {
       const start = tileOrder[t] * 0.75;
-      
-      const rev = sm(start, start + 0.22, prog);
-      tileRev[t] = rev;
+      tileRev[t] = sm(start, start + 0.22, prog);
     }
   }
 
@@ -212,52 +294,99 @@ export function createBackground(canvas) {
     if (now - lastDrawT < 120 && Math.abs(prog - drawnProg) < 0.002) return;
     lastDrawT = now;
     drawnProg = prog;
-    ctx.fillStyle = '#050608';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (dotsLayer) ctx.drawImage(dotsLayer, 0, 0);
 
-    const dotIdx = charMap.get('.') || 1;
-    const glitchClock = Math.floor(now * 0.008);
-
-    const breathOf = new Float32Array(numTiles);
-    for (let t = 0; t < numTiles; t++) breathOf[t] = 1 + 0.07 * Math.sin(now * 0.0016 + tileOrder[t] * 6.28);
-
-    for (let k = 0; k < figIdx.length; k++) {
-      const i = figIdx[k];
-      const r = (i / cols) | 0;
-      const c = i % cols;
-      const m = mask[i];
-      const t = tileIdx[i];
-
-        const rev = tileRev[t];
-        const intensity = clamp(m * rev * breathOf[t], 0, 1);
-        if (intensity < 0.08) continue;
-
-        
-        let ch = ' ';
-        const rSeed = hash(c, r, glitchClock % 97);
-        if (intensity > 0.62) {
-          const arr = GLYPHS_HEAVY;
-          ch = arr[Math.floor(hash(c, r, 1) * arr.length)];
-        } else if (intensity > 0.36) {
-          const arr = GLYPHS_MID;
-          ch = arr[Math.floor(hash(c, r, 2) * arr.length)];
-        } else {
-          const arr = GLYPHS_LIGHT;
-          ch = arr[Math.floor(hash(c, r, 3) * arr.length)];
-        }
-
-        
-        if (rSeed > 0.985) {
-          ch = GLYPHS_HEAVY[Math.floor(rSeed * GLYPHS_HEAVY.length)];
-        }
-
-        const cIdx = charMap.get(ch) || dotIdx;
-        const al = Math.min(ALPHAS.length - 1, Math.floor(intensity * 4.2));
-        const atlasY = al * chp;
-
-        ctx.drawImage(atlas, cIdx * cwp, atlasY, cwp, chp, c * cwp, r * chp, cwp, chp);
+    for (let t = 0; t < numTiles; t++) {
+      breathOf[t] = 1 + 0.07 * Math.sin(now * 0.0016 + tileOrder[t] * 6.28);
     }
+
+    tileDirty.fill(0);
+    for (let ty = 0; ty < tilesY; ty++) {
+      const rBase = ty * TH;
+      const tileH = Math.min(TH, rows - rBase);
+      for (let tx = 0; tx < tilesX; tx++) {
+        const t = ty * tilesX + tx;
+        const eff = tileRev[t] * breathOf[t];
+        const visible = tileMaxMask[t] * eff >= 0.08;
+        const quant = visible ? Math.max(1, Math.round(eff * 32)) : 0;
+        if (tileLastQuant[t] === quant) continue;
+
+        tileLastQuant[t] = quant;
+        tileDirty[t] = 1;
+        const cBase = tx * TW;
+        const tileW = Math.min(TW, cols - cBase);
+        const rx = cBase * cwp;
+        const ry = rBase * chp;
+        const rw = tileW * cwp;
+        const rh = tileH * chp;
+        ctx.drawImage(dotsLayer, rx, ry, rw, rh, rx, ry, rw, rh);
+
+        if (quant > 0) {
+          const endK = tileCellStart[t + 1];
+          for (let k = tileCellStart[t]; k < endK; k++) {
+            const prod = figCellMask[k] * eff;
+            const intensity = prod > 1 ? 1 : prod;
+            if (intensity < 0.08) continue;
+            const cIdx = intensity > 0.62 ? figCellHeavy[k] : intensity > 0.36 ? figCellMid[k] : figCellLight[k];
+            const al = Math.min(3, (intensity * 4.2) | 0);
+            ctx.drawImage(
+              atlas,
+              cIdx * cwp,
+              al * chp,
+              cwp,
+              chp,
+              figCellC[k] * cwp,
+              figCellR[k] * chp,
+              cwp,
+              chp,
+            );
+          }
+        }
+      }
+    }
+
+    const gMod = ((Math.floor(now * 0.008) % 97) + 97) % 97;
+    ctx.fillStyle = '#050608';
+
+    if (lastGlitchMod >= 0 && lastGlitchMod !== gMod) {
+      const prevBucket = getGlitchBucket(lastGlitchMod);
+      const pIdx = prevBucket.idx;
+      for (let m = 0; m < pIdx.length; m++) {
+        const k = pIdx[m];
+        const t = figCellTile[k];
+        if (tileDirty[t]) continue;
+        const eff = tileRev[t] * breathOf[t];
+        const prod = figCellMask[k] * eff;
+        const intensity = prod > 1 ? 1 : prod;
+        const px = figCellC[k] * cwp;
+        const py = figCellR[k] * chp;
+        ctx.fillRect(px, py, cwp, chp);
+        if (intensity >= 0.08) {
+          const cIdx = intensity > 0.62 ? figCellHeavy[k] : intensity > 0.36 ? figCellMid[k] : figCellLight[k];
+          const al = Math.min(3, (intensity * 4.2) | 0);
+          ctx.drawImage(atlas, cIdx * cwp, al * chp, cwp, chp, px, py, cwp, chp);
+        }
+      }
+    }
+
+    const bucket = getGlitchBucket(gMod);
+    const bIdx = bucket.idx;
+    const bChar = bucket.gChar;
+    const tickChanged = lastGlitchMod !== gMod;
+    for (let m = 0; m < bIdx.length; m++) {
+      const k = bIdx[m];
+      const t = figCellTile[k];
+      if (!tickChanged && !tileDirty[t]) continue;
+      const eff = tileRev[t] * breathOf[t];
+      const prod = figCellMask[k] * eff;
+      const intensity = prod > 1 ? 1 : prod;
+      if (intensity < 0.08) continue;
+      const al = Math.min(3, (intensity * 4.2) | 0);
+      const px = figCellC[k] * cwp;
+      const py = figCellR[k] * chp;
+      ctx.fillRect(px, py, cwp, chp);
+      ctx.drawImage(atlas, bChar[m] * cwp, al * chp, cwp, chp, px, py, cwp, chp);
+    }
+    lastGlitchMod = gMod;
   }
 
   return {

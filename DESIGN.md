@@ -35,14 +35,14 @@ Consecuencias operativas:
 
 ## El scroll es el lector
 
-Un solo recorrido vertical. El escenario (capa ASCII) queda fijo al costado; el texto vive en una columna que se pega, se lee y se suelta. La pieza siguiente no entra hasta que la anterior terminó su estado.
+Un solo recorrido vertical, nativo: la obra no captura la rueda, no intercepta el `wheel`, no hace autoscroll ni snap. El escenario (capa ASCII) queda fijo al costado mientras la pieza anima; cuando la animación termina, el mismo scroll lo empuja hacia arriba y lo saca de cuadro. El texto vive en una columna que se pega, se lee y se suelta. No hay cruce entre piezas: el modelo siguiente aparece cuando el anterior ya salió.
 
 ```
 scroll ↓                                            escenario
 ┌──────────────────────────────────────────────────────────────┐
 │ 00  umbral              40vh    sin objeto, el título         │
 ├──────────────────────────────────────────────────────────────┤
-│ 01  el libro quemado   150vh    p .05→.75  se quema           │
+│ 01  el libro quemado   150vh    p .05→.75  se quema → sale    │
 │ 02  la televisión     150vh    p .04→.45  la estática crece   │
 │ 03  la silueta         150vh    p .20→.85  se borra           │
 │ 04  las tijeras        150vh    p .20→.70  corta              │
@@ -53,15 +53,18 @@ scroll ↓                                            escenario
 └──────────────────────────────────────────────────────────────┘
 ```
 
-`p` es el progreso local de la sección: `clamp((scrollY - top) / (alto - viewport), 0, 1)`. Antes de `p = 0.05` y después de `p = 0.85` el estado se congela, para que el principio y el final de cada pieza tengan aire de lectura.
+`p` es el progreso local de la sección: `clamp((scrollY - top) / (alto - viewport), 0, 1)`. La pieza anima entre los dos valores de la tabla y congela el estado al llegar al segundo; lo que resta de `p` es la salida (ver «Escenario: fijo y después sale»).
 
 ### La columna de lectura
+
+Sin título de pieza: el modelo abre solo en su animación inicial. Al scrollear aparece la narrativa (texto propio, nunca el poema) y hace fade-out 0.70→0.85; después el modelo ejecuta su animación completa, y al final texto y objeto salen hacia arriba. Sin título, sin cita en la columna: el poema vive en el puente entre piezas, entra palabra por palabra desde 0.97 y el modelo siguiente espera su fade-out. Cenizas con física propia (gravedad, deriva, reposo vivo) en canvas aparte, independiente del scroll.
+Fases por pieza (progreso local): narrativa 0.12→0.35, animación 0.30→0.80, salida 0.85→1.0; poema-puente desde 0.97, sin superponerse al modelo. Scroll con inercia (la rueda empuja un objetivo, la página lo alcanza). El libro arde en reposo (piso 0.22) y el scroll lo consume.
 
 Cada sección mide 150vh y contiene un bloque de texto `position: sticky; top: 22vh`. El bloque entra con el scroll, se queda quieto mientras `p` avanza y sale solo cuando arranca la sección siguiente. No se desvanece: se va de cuadro.
 
 Prohibido animar la entrada y la salida del bloque de texto. Un fade a mitad de lectura es una interrupción, y un fade idéntico para todo es exactamente VS-026.
 
-**Regla dura: el parallax y la inercia no tocan la columna de lectura.** El texto legible se mueve a la velocidad exacta del scroll, punto. Lo que tiene parallax es el objeto y el fondo.
+**Regla dura: el parallax no toca la columna de lectura.** El texto legible se mueve con la página (que ahora tiene inercia propia); el objeto lleva su parallax aparte.
 
 ### El estado es una función del progreso
 
@@ -136,7 +139,7 @@ La atribución no compite con el verso. Va después, separada por 24 px vertical
 El libro quemado
 [4 versos como máximo]
 
-▬ Juan Gelman, Carta a mi madre, 1980
+▬ Juan Gelman, Bajo la lluvia ajena, 1980
 ```
 
 - Máximo 4 versos o 40 palabras por pieza, lo que sea menor. Sin poemas completos.
@@ -242,28 +245,46 @@ Consulté Noise Texture y la descarté: su propia nota avisa que con `slope: 0.1
 |---|---|---|
 | Foco y hover de enlaces de créditos | 160 ms | `color`, `outline-color` |
 | Cambio de `--glow` en umbral de estado | 300 ms | `--glow` (registrada con `@property`) |
-| Seguimiento del estado al scroll | sin `transition`: damping exponencial a 5/s | — |
-| Parallax del objeto | 0 ms, atado a `p` (sin suavizado propio) | `translate3d` |
+| Seguimiento del estado al scroll | sin `transition`: la rueda empuja un objetivo y la página lo alcanza con inercia pesada | — |
+| Salida del escenario al terminar la pieza | 0 ms, atada a `p` (lineal, sin suavizado propio) | `translate3d` |
 | Interfaz de navegación entre piezas | 240 ms | `opacity` |
 
 Nunca `transition: all`. VS-027. Nunca `ease-in`. Nunca dos elementos distintos con el mismo fade y el mismo desplazamiento: VS-026. El texto no se anima; el objeto sí. Esa asimetría es el sistema.
 
-Parallax del objeto: `translateY` entre `-3%` y `+3%` de su alto, es decir como máximo ±32 px en 1080 de alto. El fondo se mueve como máximo 12 px en el recorrido completo. Más que eso y el objeto deja de estar en un lugar para estar flotando.
+### Un solo movimiento, sin variante calmada
 
-`scroll-behavior: auto` siempre. El `smooth` nativo pelea con la rueda y duplica la inercia.
+Decisión del autor (22/11/2026): **no hay movimiento reducido**. La obra tiene un único diseño de movimiento y no ofrece un modo quieto ni una rama `@media (prefers-reduced-motion: reduce)`. Esto anula el requisito de VS-035 y la exigencia de los cuatro escalones (0, .33, .66, 1): se borran. El damping exponencial se queda; es el seguimiento del estado, no un adorno.
 
-### Movimiento reducido
+Quien necesite menos movimiento usa el zoom o los controles del sistema; la obra no promete una versión estática. Un segundo diseño de movimiento es un segundo sistema que nadie pidió.
 
-`@media (prefers-reduced-motion: reduce)`:
+### Scroll nativo, sin captura
 
-- `p` se usa crudo, sin damping: el estado salta con el scroll.
-- Parallax en cero: el objeto no se desplaza, sólo cambia de estado.
-- El arrastre no tiene inercia ni tope elástico.
-- Los estados se aplican en 4 escalones (0, .33, .66, 1) en vez de interpolar, para que no haya morphing continuo.
-- `--glow` fijo en 1, sin transición.
-- Ninguna rotación ociosa (hoy hay una deriva temporal en el loop).
+La rueda, el trackpad, las teclas de scroll y la barra hacen exactamente lo que hace el navegador. Prohibido: `wheel` + `preventDefault`, autoscroll, scroll programático por paso, `scroll-snap`, librerías de smooth (Lenis y compañía) y `scroll-behavior: smooth`.
 
-VS-035. Esto no es opcional ni un extra de fin de sprint.
+```css
+html { scroll-behavior: auto; }
+```
+
+`auto` siempre: el `smooth` nativo pelea con la rueda y duplica la inercia. El único desplazamiento que la obra controla es el del escenario dentro del viewport, no el del documento.
+
+### Escenario: fijo y después sale
+
+El escenario es una capa `position: fixed` y no se desvanece nunca. Estado en función de `p`, sin memoria:
+
+```js
+// pEnd = fin de animación de la pieza (FREEZE_HI, tabla de arriba)
+const exit = clamp01((p - pEnd) / (1 - pEnd));
+scene.style.transform = `translate3d(0, ${-exit * 110}vh, 0)`; // 110vh: sale del todo
+```
+
+- `p ≤ pEnd`: el modelo está fijo y anima. El escenario no se mueve.
+- `p > pEnd`: la animación ya terminó (estado congelado); cada píxel de scroll sube el escenario, hasta salir de cuadro en `p = 1`.
+- Subir deshace: `p` baja, `exit` baja, el modelo vuelve a entrar desde arriba y se reanima hacia atrás. Nada de `disappeared: true` ni de un estado que quede pegado.
+- **La salida es un desplazamiento, no un fade.** Se elimina el crossfade fantasma entre piezas: no hay dos modelos visibles a la vez ni opacidad cruzada. El modelo anterior sale de cuadro y el siguiente entra cuando su sección arranca.
+- La columna de lectura queda por encima del escenario y sigue el scroll a velocidad exacta; la salida del objeto no la toca.
+
+Parallax del objeto: `translateY` entre `-3%` y `+3%` de su alto, es decir como máximo ±32 px en 1080 de alto. El fondo se mueve como máximo 12 px en el recorrido completo. Más que eso y el objeto deja de estar en un lugar para estar flotando. El parallax se suma al `translate3d` de salida, nunca lo reemplaza.
+
 
 ---
 
@@ -278,7 +299,7 @@ Estructura por pieza:
   <h2 id="t-01">El libro quemado</h2>
   <blockquote cite="https://…">
     <p>…</p>
-    <footer>Juan Gelman, <i>Carta a mi madre</i>, 1980</footer>
+    <footer>Juan Gelman, <i>Bajo la lluvia ajena</i>, 1980</footer>
   </blockquote>
 </section>
 ```
@@ -289,8 +310,11 @@ Estructura por pieza:
 - Foco: `outline: 2px solid #d99b26; outline-offset: 3px`. Sobre el fondo, 8.07:1, muy por encima del 3:1 de componentes. Sin `outline: none` en ningún lado.
 - Teclado: `Tab` recorre enlace de salto → citas → créditos. `ArrowDown`/`ArrowUp`/`PageDown`/`PageUp`/`Home`/`End` scrollean nativo. `ArrowRight`/`ArrowLeft` saltan al inicio de la pieza siguiente o anterior, como atajo: es la única forma de navegar pieza a pieza sin arrastrar la rueda 900vh.
 - El arrastre no tiene equivalente de teclado y no lo necesita: no carga información. Si la rotación revelara contenido, tendría que tenerlo; gira sólo la pose.
-- Zoom 200%: la columna pasa al layout apilado y la grilla ASCII baja de densidad (celda mínima 8 px), sin recortar texto. Requiere sacar el `overflow: hidden` actual del `body`.
-- Nada de `title="…"` como tooltip. Si hace falta explicar un control, se explica con texto visible.
+- Scroll nativo: la obra no captura la rueda ni intercepta las teclas de scroll, así que la barra y el teclado del navegador funcionan siempre, con o sin foco en la columna.
+- El cursor no se oculta sobre la columna de lectura. `cursor: none` aplica al escenario y a nada más: un cursor invisible sobre un párrafo es un defecto que rompe la lectura, no una decisión estética que se defiende.
+- No hay variante de movimiento reducido, por decisión del autor: un solo diseño de movimiento y ningún modo calmado. La accesibilidad se sostiene en el texto del DOM, el foco visible y el scroll nativo, no en una rama `prefers-reduced-motion`.
+- Zoom 200%: la columna pasa al layout apilado y la grilla ASCII baja de densidad (celda mínima 8 px) sin recortar texto, para lo cual el `body` no puede tener `overflow: hidden` ni secciones con alto fijo que corten el contenido cuando crece la tipografía.
+- Nada de `title="…"` como tooltip. Si hay que explicar un control, se explica con texto visible.
 
 Números medidos con la fórmula de luminancia relativa de WCAG 2.2 sobre los hex de arriba. No hay estimaciones: 17.84, 11.65, 8.07, 7.62, 5.87 (`#b0854e`, si alguna vez se usa como ámbar apagado), 4.11 (`#64748b`, descartado para texto), 1.55 (`#2e3342`, filete).
 
@@ -310,7 +334,7 @@ El loop ya tiene un techo de 32 ms; se mantiene. El estado se recalcula sólo si
 
 **Galería.** Índice navegable de las seis piezas: título, primera línea de la cita, y un cuadro de la trama en su estado inicial. Es la puerta de entrada para quien no quiere atravesar 900vh de scroll, y la tabla de contenidos para volver a una pieza. Sin miniaturas ilustradas, sin tarjetas con sombra: una lista tipográfica con la trama a la izquierda. Por decidir: si la trama del índice es una captura del estado inicial (barata, honesta) o un render vivo por pieza (caro en CPU, seis loops).
 
-**Configuración.** Cuatro ajustes y ninguno más: densidad de grilla (celda 6/8/10 px), tipografía de lectura (Newsreader y la que se sume como alternativa serif), contraste (normal / alto: `--paper` a `#e0d9cc` y `--bg` a `#07080b`), movimiento (auto / reducido). Persistencia en `localStorage`. Se descarta el selector de temas: un aparato de memoria no es un producto con apariencias. Por decidir: si el contraste alto también cambia el glow (bajarlo) o lo deja igual.
+**Configuración.** Tres ajustes y ninguno más: densidad de grilla (celda 6/8/10 px), tipografía de lectura (Newsreader y la que se sume como alternativa serif) y contraste (normal / alto: `--paper` a `#e0d9cc` y `--bg` a `#07080b`). No hay ajuste de movimiento: la obra tiene un solo diseño de movimiento (ver §Movimiento). Persistencia en `localStorage`. Se descarta el selector de temas: un aparato de memoria no es un producto con apariencias. Por decidir: si el contraste alto también cambia el glow (bajarlo) o lo deja igual.
 
 **Créditos y fuentes.** Resuelto en la Etapa 3 (`PLAN.md`). El colofón es la última sección del scroll (80 vh), no una página aparte: el recorrido no se alarga y la obra cierra en el mismo documento. Lleva, por cada cita, autor, obra, año, la edición o dirección donde se consultó y el estado de permiso; después, licencias de código y tipografía (Sligoil Micro, Ariel Martín Pérez / Velvetyne, SIL OFL 1.1; Three.js, MIT), el contexto histórico consultado y la aclaración de que los modelos son representaciones, no levantamientos técnicos. El material de `docs/FUENTES.md` quedó absorbido ahí y el archivo se borró: las fuentes viven en la obra, una sola vez.
 

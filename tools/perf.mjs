@@ -61,7 +61,7 @@ const res = await call('Runtime.evaluate', {
     const models = window.__artefact0s.models;
     const sections = window.__artefact0s.sections;
     const mod = await import('/src/geometry.js');
-    const book = models.get('book');
+    const book = models.get('libro');
 
     const t0 = performance.now();
     for (let i = 0; i < 10; i++) {

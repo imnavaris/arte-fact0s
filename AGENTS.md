@@ -31,7 +31,7 @@ No requiere npm para visualizar: `vendor/` está commiteado. npm sólo hace falt
 | Raster | glyphcss: `Polygon[]` -> texto en un `<pre>` del DOM | `vendor/glyphcss.js` |
 | Puente | Three.js `BufferGeometry` -> `Polygon[]` con color por cara monocromo papel | `src/geometry.js` |
 | Escena | Escena glyphcss + esculpido continuo del texto sobre la grilla (`fitMultiState`) | `src/glyph-stage.js` |
-| Modelos | Los seis artefactos, procedurales. Cada uno es `update(p)`: una función pura del progreso. | `src/models/*.js` |
+| Modelos | Los seis artefactos, procedurales. Cada uno es `update(p)`: una función pura del progreso. | `src/modelos/*.js` |
 | Servidor | Python stdlib: estático, inyecta con escape HTML el corpus en el documento y soporta `--bake` | `server.py` |
 
 ## Mapa de archivos
@@ -46,7 +46,7 @@ AGENTS.md             este archivo
 src/main.js           bootstrap: fuente, corpus, seis piezas, scroll, teclado, arrastre
 src/geometry.js       conversor Three.js -> Polygon[] con clampPaperColor WCAG AA
 src/glyph-stage.js    escena glyphcss, grilla, esculpido continuo, encuadre multi-estado
-src/models/*.js       los seis artefactos monocromo
+src/modelos/*.js      los seis artefactos monocromo
 assets/texts/         corpus de citas verificadas (fuente de verdad del texto)
 assets/fonts/         Sligoil Micro (trama ASCII), Newsreader (lectura)
 vendor/               bundles commiteados: three, glyphcss

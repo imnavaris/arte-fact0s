@@ -9,7 +9,7 @@ const PORT = process.env.PORT || '8000';
 const DEBUG_PORT = 9336;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const piece = process.argv[2] || 'book';
+const piece = process.argv[2] || 'libro';
 const outDir = process.argv[3] || '.';
 
 const chrome = spawn(CHROME, [

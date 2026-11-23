@@ -138,11 +138,11 @@ Rendimiento:
 
 - [x] Inscripción con palabras separadas por `·`, un verso por fila (`src/glyph-stage.js`)
 - [x] Trama de 14 px (`style.css`, `src/main.js`)
-- [x] Fuego de glifos, sin partículas (`src/glyph-stage.js`, `src/models/book.js`)
-- [x] El libro se quema hoja por hoja (`src/models/book.js`)
-- [x] La silueta se borra en el sitio (`src/models/silhouette.js`)
+- [x] Fuego de glifos, sin partículas (`src/glyph-stage.js`, `src/modelos/libro.js`)
+- [x] El libro se quema hoja por hoja (`src/modelos/libro.js`)
+- [x] La silueta se borra en el sitio (`src/modelos/silueta.js`)
 - [x] Rotación libre: yaw sin tope, pitch ±90° (`src/main.js`)
-- [x] Scroll sin lecturas de layout por cuadro (`src/main.js`, `src/models/book.js`)
+- [x] Scroll sin lecturas de layout por cuadro (`src/main.js`, `src/modelos/libro.js`)
 - [x] Colofón limpio, licencias en `LICENSE.md` (`index.html`, `LICENSE.md`)
 
 ---
@@ -151,8 +151,8 @@ Rendimiento:
 
 - [x] Corpus único pre-horneado con escape HTML (`texts.json`, `server.py`, `index.html`)
 - [x] Esculpido continuo y encuadre multi-estado (`src/glyph-stage.js`)
-- [x] Monocromo cálido con piso AA (`src/geometry.js`, `src/models/*`, `src/glyph-stage.js`)
-- [x] Modelos reconstruidos y geometrías livianas (`src/models/*`)
+- [x] Monocromo cálido con piso AA (`src/geometry.js`, `src/modelos/*`, `src/glyph-stage.js`)
+- [x] Modelos reconstruidos y geometrías livianas (`src/modelos/*`)
 - [x] Umbral, skip-link, glow, teclado completo y mobile (`index.html`, `style.css`, `src/main.js`)
 
 ---

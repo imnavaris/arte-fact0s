@@ -1,37 +1,38 @@
-import {T,mat,texMat,box,part,tube} from './shared.js';
+import {T,mat,texMat,box,part,tube} from './compartido.js';
 
 const sm=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);};
 
-export function createFlight(){
+export function crearVuelo(){
  const root=new T.Group();
 
+// Fuselaje
  const fuselageMat=texMat((c,w,h)=>{
  const g=c.createLinearGradient(0,0,0,h);
  g.addColorStop(0,'#f2efe6');g.addColorStop(.45,'#dfd8c8');g.addColorStop(.55,'#b8b0a0');
  g.addColorStop(.75,'#968e80');g.addColorStop(1,'#787062');
  c.fillStyle=g;c.fillRect(0,0,w,h);
- },{roughness:.5,metalness:.22});
+ },{roughness:.46,metalness:.28});
  const wingMat=texMat((c,w,h)=>{
  const g=c.createLinearGradient(0,0,w,h);
  g.addColorStop(0,'#f5f2ea');g.addColorStop(.45,'#e6dfd1');g.addColorStop(.85,'#bfb7a7');g.addColorStop(1,'#968e80');
  c.fillStyle=g;c.fillRect(0,0,w,h);
- },{roughness:.42,metalness:.45});
+ },{roughness:.38,metalness:.55});
  const tailFinMat=texMat((c,w,h)=>{
  const g=c.createLinearGradient(0,0,w,h);
  g.addColorStop(0,'#ebe4d6');g.addColorStop(.5,'#d8d0c0');g.addColorStop(1,'#8e8678');
  c.fillStyle=g;c.fillRect(0,0,w,h);
- },{roughness:.48,metalness:.25});
+ },{roughness:.44,metalness:.30});
 
- const nacelleMat=mat('#b8b0a0',{roughness:.4,metalness:.55});
- const darkMetal=mat('#7c7466',{roughness:.5,metalness:.45});
- const glassMat=mat('#524d44',{roughness:.3,metalness:.3});
- const propTipMat=mat('#ebe4d6',{roughness:.35,metalness:.4});
+ const nacelleMat=mat('#b8b0a0',{roughness:.36,metalness:.6});
+ const darkMetal=mat('#7c7466',{roughness:.45,metalness:.5});
+ const glassMat=mat('#524d44',{roughness:.22,metalness:.4});
+ const propTipMat=mat('#ebe4d6',{roughness:.32,metalness:.55});
  
- const rampMat=mat('#f5f0e4',{roughness:.38,metalness:.25});
- const rampRibMat=mat('#c8c0b0',{roughness:.45,metalness:.35});
+ const rampMat=mat('#f7f3e8',{roughness:.34,metalness:.28});
+ const rampRibMat=mat('#c8c0b0',{roughness:.42,metalness:.4});
  
- const voidMat=mat('#18191e',{roughness:1,metalness:0});
- voidMat.userData={fixedColor:'#22242c'};
+ const voidMat=mat('#22201d',{roughness:1,metalness:0});
+ voidMat.userData={fixedColor:'#22201d',unlit:true};
 
  
  box(root,[2.75,.94,1.08],fuselageMat,[-.15,-.02,0]);
@@ -71,6 +72,7 @@ export function createFlight(){
  part(root,new T.CylinderGeometry(.15,.15,.13,12),darkMetal,[-1.45,-.82,0],[Math.PI/2,0,0]);
  tube(root,[[-1.38,-.4,0],[-1.45,-.82,0]],.038,darkMetal,12,5);
 
+// Helices
  const props=[];
  for(const s of [-1,1]){
  const p=new T.Group();
@@ -82,6 +84,7 @@ export function createFlight(){
  }
 
  
+// Rampa
  const ramp=new T.Group();
  ramp.position.set(1.68,-.44,0);
  root.add(ramp);
@@ -103,20 +106,22 @@ export function createFlight(){
 
  return {
  root,
- kind:'flight',
+ kind:'vuelo',
   animated:true,
+  fitStates:[0,0.5,1.0],
   frame(now){ this._t=(now||0)*0.001; },
+// Vuelo
  update(p){
   const t=this._t||0;
- const open=sm(.02,.65,p);
- 
- ramp.rotation.z=-open*Math.PI*.66;
- struts.visible=open>.25;
- props.forEach((pr,i)=>{pr.rotation.x=(p*36+t*16)*(i?1:-1);});
-  root.position.y=Math.sin(t*2.1+p*6)*.05;
- 
- root.rotation.y=-.72-open*.48;
- root.rotation.x=.28+open*.18;
+  const turn=sm(.04,.70,p);
+  const open=sm(.16,.76,p);
+  ramp.rotation.z=-open*Math.PI*.68;
+  struts.visible=open>.22;
+  props[0].rotation.x = -(p*12+t*3.5);
+  props[1].rotation.x = p*12+t*3.5;
+  root.rotation.y=-1.60+turn*1.24;
+  root.rotation.x=.08*(1-turn);
+  root.rotation.z=-.04+turn*.08;
  }
  };
 }

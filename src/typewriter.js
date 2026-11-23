@@ -1,4 +1,5 @@
 const CURSOR = "▌";
+// Filas del teclado
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
 function mulberry32(a) {
@@ -22,6 +23,7 @@ function slip(ch, rand) {
   return null;
 }
 
+// Maquina de escribir
 export class Typewriter {
   constructor(p, { seed = 31 } = {}) {
     this.p = p;
@@ -74,24 +76,29 @@ export class Typewriter {
     this.render("", false);
   }
 
-  setScroll(p, nowMs, dt) {
-    const nowSec = nowMs * 0.001;
+  setScroll(p, nowMs, dt = 1 / 60, immediate = false) {
+    const nowSec = (nowMs || 0) * 0.001;
+    const safeDt = Number.isFinite(dt) && dt > 0 ? Math.min(0.1, dt) : 1 / 60;
     let ratio = 0;
     if (p <= 0.3) ratio = 0;
     else if (p <= 0.75) ratio = (p - 0.3) / (0.75 - 0.3);
     else ratio = 1;
 
     this.targetT = ratio * this.doneTime;
-    const diff = this.targetT - this.curT;
 
-    if (Math.abs(diff) < 0.001) {
+    if (immediate) {
       this.curT = this.targetT;
-    } else if (diff > 0) {
-      
-      this.curT += diff * Math.min(1, dt * 9);
     } else {
-      
-      this.curT += diff * Math.min(1, dt * 15);
+      const diff = this.targetT - this.curT;
+      if (Math.abs(diff) < 0.001) {
+        this.curT = this.targetT;
+      } else if (diff > 0) {
+        this.curT += diff * (1 - Math.exp(-safeDt * 12));
+        if (ratio >= 1 && this.curT >= this.doneTime * 0.985) this.curT = this.doneTime;
+      } else {
+        this.curT += diff * (1 - Math.exp(-safeDt * 16));
+        if (ratio <= 0 && this.curT <= this.doneTime * 0.015) this.curT = 0;
+      }
     }
 
     let line = "";
@@ -106,11 +113,11 @@ export class Typewriter {
       this.lastEventTime = nowSec;
     }
 
-    const active = p > 0.02 && p < 0.98 && this.curT > 0.005;
+    const active = !immediate && p > 0.02 && p < 0.98 && this.curT > 0.005 && this.curT < this.doneTime - 1e-4;
     const idle = Math.max(0, nowSec - this.lastEventTime);
     
     const lit = active && (idle < 0.4 || (idle - 0.4) % 0.9 > 0.45);
-    const isDone = this.curT >= this.doneTime * 0.99;
+    const isDone = this.curT >= this.doneTime - 1e-4;
 
     if (isDone !== this.done) {
       this.done = isDone;
@@ -129,6 +136,10 @@ export class Typewriter {
   reset() {
     this.curT = 0;
     this.targetT = 0;
+    this.lastText = "";
+    this._renderedText = "";
+    this.lastLit = false;
+    this.lastEventTime = 0;
     this.done = false;
     this.block.classList.remove("is-done");
     this.render("", false);
@@ -136,6 +147,9 @@ export class Typewriter {
   finish() {
     this.curT = this.doneTime;
     this.targetT = this.doneTime;
+    this.lastText = this.full;
+    this._renderedText = this.full;
+    this.lastLit = false;
     this.done = true;
     this.block.classList.add("is-done");
     this.render(this.full, false);

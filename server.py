@@ -10,6 +10,7 @@ import html
 import re
 
 ROOT = Path(__file__).resolve().parent
+# Corpus
 CORPUS = ROOT / 'assets' / 'texts' / 'texts.json'
 CITAS_START = '<!--CITAS:START-->'
 CITAS_END = '<!--CITAS:END-->'
@@ -35,6 +36,7 @@ def linkify_urls(text):
     return re.sub(r'https?://[^\s<>"]+', repl, escaped)
 
 
+# Citas
 def build_citations():
     data = json.loads(CORPUS.read_text(encoding='utf-8'))
     blocks = []
@@ -55,9 +57,12 @@ def build_citations():
         source_url = extract_url(text.get('source', ''))
         cite_attr = f' cite="{source_url}"' if source_url else ''
 
+        narr = (text.get('narrativa') or '').strip()
+        narr_html = f'\n            <p class="narrativa">{html.escape(narr)}</p>' if narr else ''
+
         blocks.append(f'''        <section class="piece" id="piece-{piece}" data-piece="{piece}" aria-labelledby="t-{piece}">
           <div class="piece-inner">
-            <h2 id="t-{piece}" class="piece-title">{title}</h2>
+            <h2 id="t-{piece}" class="piece-title">{title}</h2>{narr_html}
             <blockquote class="citation"{cite_attr}>
               <p>
 {lines}          </p>
@@ -68,6 +73,7 @@ def build_citations():
     return '\n'.join(blocks)
 
 
+# Creditos
 def build_credits():
     data = json.loads(CORPUS.read_text(encoding='utf-8'))
     blocks = []
@@ -105,7 +111,7 @@ def inject_corpus(doc_html):
     elif '<!--CITAS-->' in doc_html:
         doc_html = doc_html.replace('<!--CITAS-->', citations_html)
 
-    if CREDITOS_START in CREDITOS_END or (CREDITOS_START in doc_html and CREDITOS_END in doc_html):
+    if CREDITOS_START in doc_html and CREDITOS_END in doc_html:
         doc_html = re.sub(r'<!--CREDITOS:START-->.*?<!--CREDITOS:END-->', credits_html, doc_html, flags=re.DOTALL)
     elif '<!--CREDITOS-->' in doc_html:
         doc_html = doc_html.replace('<!--CREDITOS-->', credits_html)
@@ -113,7 +119,10 @@ def inject_corpus(doc_html):
     return doc_html
 
 
+# Servidor
 class Handler(http.server.SimpleHTTPRequestHandler):
+    DEV = False
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
@@ -132,6 +141,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             return
         if path == '/events':
+            if not self.DEV:
+                self.send_error(404)
+                return
             return self.serve_events()
         if path in ('/', '/index.html'):
             return self.send_index()
@@ -177,23 +189,27 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def send_index(self):
         html_content = (ROOT / 'index.html').read_text(encoding='utf-8')
         html_content = inject_corpus(html_content)
-        if '</body>' in html_content:
-            html_content = html_content.replace('</body>', LIVE_RELOAD + '</body>', 1)
-        else:
-            html_content += LIVE_RELOAD
+        if self.DEV:
+            if '</body>' in html_content:
+                html_content = html_content.replace('</body>', LIVE_RELOAD + '</body>', 1)
+            else:
+                html_content += LIVE_RELOAD
         body = html_content.encode('utf-8')
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
-        self.send_header('Clear-Site-Data', '"cache"')
+        if self.DEV:
+            self.send_header('Clear-Site-Data', '"cache"')
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
 
+# Arranque
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--bake', action='store_true', help='Actualiza index.html en disco con citas y créditos pre-renderizados.')
+    parser.add_argument('--dev', action='store_true', help='Modo desarrollo: live-reload por SSE, /events y Clear-Site-Data.')
     args = parser.parse_args()
 
     if args.bake:
@@ -206,5 +222,6 @@ if __name__ == '__main__':
         else:
             print('Error: index.html no existe.', flush=True)
     else:
+        Handler.DEV = args.dev
         print(f'http://localhost:{args.port}', flush=True)
         http.server.ThreadingHTTPServer(('127.0.0.1', args.port), Handler).serve_forever()

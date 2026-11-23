@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 const CHROME = 'C:\\Users\\Usuario\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
 const PORT = process.env.PORT || '8000';
 
-const [piece = 'book', poseList = '0,0', p = '0'] = process.argv.slice(2);
+const [piece = 'libro', poseList = '0,0', p = '0'] = process.argv.slice(2);
 
 for (const pose of poseList.split(/\s+/).filter(Boolean)) {
   const [rx, ry] = pose.split(',');

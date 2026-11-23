@@ -11,10 +11,12 @@ function hash(a, b = 0) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
+// Titulos que se disuelven
 export class Dissolve {
-  constructor(el, { seed = 3 } = {}) {
+  constructor(el, { seed = 3, reducedMotion = false } = {}) {
     this.el = el;
     this.seed = seed;
+    this.reducedMotion = Boolean(reducedMotion);
     this.rawText = el.textContent.trim();
     this.cleanText = this.rawText.toUpperCase();
     this.chars = [...this.cleanText.replace(/ /g, '')];
@@ -45,9 +47,16 @@ export class Dissolve {
     this.set(0);
   }
 
+  setReducedMotion(value) {
+    this.reducedMotion = Boolean(value);
+    const prev = this.t;
+    this.t = -1;
+    this.set(prev < 0 ? 0 : prev);
+  }
+
   set(t) {
     t = Math.min(1, Math.max(0, t));
-    if (Math.abs(t - this.t) < 0.003) return;
+    if (t === this.t || (t > 0 && t < 1 && Math.abs(t - this.t) < 0.003)) return;
     this.t = t;
 
     if (t <= 0.01) {
@@ -59,6 +68,14 @@ export class Dissolve {
     this.el.style.opacity = String(Math.min(1, t * 1.8));
 
     const len = this.chars.length;
+    if (this.reducedMotion) {
+      for (let i = 0; i < len; i++) {
+        this.spans[i].textContent = this.chars[i];
+        this.spans[i].className = "dz-char";
+      }
+      return;
+    }
+
     for (let i = 0; i < len; i++) {
       const ch = this.chars[i];
       const span = this.spans[i];
@@ -91,6 +108,7 @@ export class Dissolve {
 
   frame(now) {
     this.now = now;
+    if (this.reducedMotion) return;
     
     if (this.t > 0.02 && this.t < 0.98) {
       const prevT = this.t;

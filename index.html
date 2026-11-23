@@ -7,9 +7,12 @@
   <title>arte/fact0s</title>
   <meta name="description" content="Seis objetos de la última dictadura cívico-militar argentina reconstruidos como cuerpos tipográficos y memoria literaria.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230b0c10'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' fill='%23cfc7b8' text-anchor='middle'%3E%C2%B7%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap">
   <link rel="stylesheet" href="style.css">
   <link rel="preload" href="assets/fonts/Newsreader.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/fonts/paper-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Sligoil-Micro.woff2" as="font" type="font/woff2" crossorigin>
   <script>document.documentElement.classList.add('js')</script>
   <script type="importmap">{"imports":{"three":"./vendor/three.js","glyphcss":"./vendor/glyphcss.js"}}</script>
 </head>
@@ -25,20 +28,28 @@
  <canvas id="bg" class="bg" aria-hidden="true"></canvas>
   <main class="column" id="main-content">
     <!--CITAS:START-->
-        <section class="piece" id="piece-book" data-piece="book" aria-labelledby="t-book">
+        <section class="piece" id="piece-libro" data-piece="libro" aria-labelledby="t-libro">
           <div class="piece-inner">
-            <h2 id="t-book" class="piece-title">El libro quemado</h2>
-            <blockquote class="citation" cite="https://materialdlectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4">
+            <h2 id="t-libro" class="piece-title">El libro quemado</h2>
+            <p class="narrativa">[Narrativa del libro — texto provisorio, reemplazar por el definitivo]
+El fuego empieza por las orillas.</p>
+            <blockquote class="citation" cite="https://materialdelectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4">
               <p>
-          <span>¿Acaso soy otra cosa? Vinieron dictaduras militares, gobiernos civiles y nuevas dictaduras militares, me quitaron los libros, el pan, el hijo, desesperaron a mi madre.</span>
+          <span>¿Acaso soy otra cosa?</span>
+          <span>Vinieron dictaduras militares,</span>
+          <span>gobiernos civiles y nuevas dictaduras militares,</span>
+          <span>me quitaron los libros, el pan, el hijo,</span>
+          <span>desesperaron a mi madre.</span>
           </p>
               <footer>Juan Gelman, <i>Bajo la lluvia ajena (notas al pie de una derrota), 1980</i></footer>
             </blockquote>
           </div>
         </section>
-        <section class="piece" id="piece-silhouette" data-piece="silhouette" aria-labelledby="t-silhouette">
+        <section class="piece" id="piece-silueta" data-piece="silueta" aria-labelledby="t-silueta">
           <div class="piece-inner">
-            <h2 id="t-silhouette" class="piece-title">La silueta</h2>
+            <h2 id="t-silueta" class="piece-title">La silueta</h2>
+            <p class="narrativa">[Narrativa de la silueta — texto provisorio, reemplazar por el definitivo]
+Una figura que se borra en el sitio.</p>
             <blockquote class="citation" cite="https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar">
               <p>
           <span>Quince mil desaparecidos,</span>
@@ -50,9 +61,11 @@
             </blockquote>
           </div>
         </section>
-        <section class="piece" id="piece-scissors" data-piece="scissors" aria-labelledby="t-scissors">
+        <section class="piece" id="piece-tijeras" data-piece="tijeras" aria-labelledby="t-tijeras">
           <div class="piece-inner">
-            <h2 id="t-scissors" class="piece-title">Las tijeras</h2>
+            <h2 id="t-tijeras" class="piece-title">Las tijeras</h2>
+            <p class="narrativa">[Narrativa de las tijeras — texto provisorio, reemplazar por el definitivo]
+El corte cae sobre la cinta.</p>
             <blockquote class="citation" cite="https://www.educ.ar/recursos/129099/desventuras-en-el-pais-jardin-de-infantes">
               <p>
           <span>Hace tiempo que somos como niños</span>
@@ -67,7 +80,9 @@
         <section class="piece" id="piece-tv" data-piece="tv" aria-labelledby="t-tv">
           <div class="piece-inner">
             <h2 id="t-tv" class="piece-title">La televisión</h2>
-            <blockquote class="citation" cite="https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar.">
+            <p class="narrativa">[Narrativa de la televisión — texto provisorio, reemplazar por el definitivo]
+La pantalla se llena de ruido.</p>
+            <blockquote class="citation" cite="https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar">
               <p>
           <span>Entre mil quinientas y tres mil personas</span>
           <span>han sido masacradas en secreto</span>
@@ -78,10 +93,12 @@
             </blockquote>
           </div>
         </section>
-        <section class="piece" id="piece-birds" data-piece="birds" aria-labelledby="t-birds">
+        <section class="piece" id="piece-pajaros" data-piece="pajaros" aria-labelledby="t-pajaros">
           <div class="piece-inner">
-            <h2 id="t-birds" class="piece-title">Los pájaros</h2>
-            <blockquote class="citation" cite="https://catalogo.bn.gov.ar/">
+            <h2 id="t-pajaros" class="piece-title">Los pájaros</h2>
+            <p class="narrativa">[Narrativa de los pájaros — texto provisorio, reemplazar por el definitivo]
+La jaula se cierra sola.</p>
+            <blockquote class="citation" cite="https://www.adrianahidalgo.com/libro/obra-poetica-francisco-urondo/">
               <p>
           <span>Del otro lado de la reja</span>
           <span>está la realidad, de este lado</span>
@@ -92,10 +109,12 @@
             </blockquote>
           </div>
         </section>
-        <section class="piece" id="piece-flight" data-piece="flight" aria-labelledby="t-flight">
+        <section class="piece" id="piece-vuelo" data-piece="vuelo" aria-labelledby="t-vuelo">
           <div class="piece-inner">
-            <h2 id="t-flight" class="piece-title">El vuelo</h2>
-            <blockquote class="citation" cite="https://catalogo.bn.gov.ar/">
+            <h2 id="t-vuelo" class="piece-title">El vuelo</h2>
+            <p class="narrativa">[Narrativa del vuelo — texto provisorio, reemplazar por el definitivo]
+La rampa baja hacia el río.</p>
+            <blockquote class="citation" cite="https://archive.org/details/NestorPerlongher">
               <p>
           <span>En el fondo del río</span>
           <span>en el fondo del mar</span>
@@ -113,8 +132,12 @@
         <p class="notice">Citas breves con fines de estudio. Cada fragmento lleva autor, obra, año, la edición o dirección donde se consultó y el estado de permiso.</p>
         <div class="credits"><!--CREDITOS:START-->
         <div class="credits-item">
-          <p class="credits-cite">¿Acaso soy otra cosa? Vinieron dictaduras militares, gobiernos civiles y nuevas dictaduras militares, me quitaron los libros, el pan, el hijo, desesperaron a mi madre.</p>
-          <p class="credits-meta">Juan Gelman, <i>Bajo la lluvia ajena (notas al pie de una derrota), 1980</i>. Material de Lectura, UNAM: Juan Gelman, Poesía moderna, «De Bajo la lluvia ajena (1980)», sección III. <a href="https://materialdlectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4" target="_blank" rel="noopener noreferrer">https://materialdlectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4</a></p>
+          <p class="credits-cite">¿Acaso soy otra cosa?
+Vinieron dictaduras militares,
+gobiernos civiles y nuevas dictaduras militares,
+me quitaron los libros, el pan, el hijo,
+desesperaron a mi madre.</p>
+          <p class="credits-meta">Juan Gelman, <i>Bajo la lluvia ajena (notas al pie de una derrota), 1980</i>. Material de Lectura, UNAM: Juan Gelman, Poesía moderna, «De Bajo la lluvia ajena (1980)», sección III. <a href="https://materialdelectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4" target="_blank" rel="noopener noreferrer">https://materialdelectura.unam.mx/poesia-moderna/16-poesia-moderna-cat/333-183-juan-gelman?start=4</a></p>
           <p class="credits-meta">Obra con derechos reservados (Juan Gelman, 1930-2014). Cita breve conforme al derecho de cita (art. 10, Ley 11.723, Argentina).</p>
         </div>
         <div class="credits-item">
@@ -138,7 +161,7 @@ nos borrara la voz en el cuaderno.</p>
 han sido masacradas en secreto
 después que ustedes prohibieron informar
 sobre hallazgos de cadáveres.</p>
-          <p class="credits-meta">Rodolfo Walsh, <i>Carta abierta de un escritor a la Junta Militar, 1977</i>. Rodolfo Walsh, «Carta abierta de un escritor a la Junta Militar», Buenos Aires, 24 de marzo de 1977, apartado 4. Texto cotejado en Wikisource: <a href="https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar." target="_blank" rel="noopener noreferrer">https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar.</a> La carta habla de prensa y diarios; la elección de la televisión como objeto es de la obra.</p>
+          <p class="credits-meta">Rodolfo Walsh, <i>Carta abierta de un escritor a la Junta Militar, 1977</i>. Rodolfo Walsh, «Carta abierta de un escritor a la Junta Militar», Buenos Aires, 24 de marzo de 1977, apartado 4. Texto cotejado en Wikisource: <a href="https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar" target="_blank" rel="noopener noreferrer">https://es.wikisource.org/wiki/Carta_abierta_de_un_escritor_a_la_Junta_Militar</a> — La carta habla de prensa y diarios; la elección de la televisión como objeto es de la obra.</p>
           <p class="credits-meta">Documento histórico de derechos humanos y cita breve conforme al derecho de cita (art. 10, Ley 11.723, Argentina).</p>
         </div>
         <div class="credits-item">
@@ -146,7 +169,7 @@ sobre hallazgos de cadáveres.</p>
 está la realidad, de este lado
 de la reja también está
 la realidad.</p>
-          <p class="credits-meta">Paco Urondo, <i>Poemas de la cárcel (Villa Devoto), 1973</i>. Francisco «Paco» Urondo, Obra poética, Adriana Hidalgo Editora, Buenos Aires, 2006, p. 412. <a href="https://catalogo.bn.gov.ar/" target="_blank" rel="noopener noreferrer">https://catalogo.bn.gov.ar/</a></p>
+          <p class="credits-meta">Paco Urondo, <i>Poemas de la cárcel (Villa Devoto), 1973</i>. Francisco «Paco» Urondo, Obra poética, Adriana Hidalgo Editora, Buenos Aires, 2006, p. 412. <a href="https://www.adrianahidalgo.com/libro/obra-poetica-francisco-urondo/" target="_blank" rel="noopener noreferrer">https://www.adrianahidalgo.com/libro/obra-poetica-francisco-urondo/</a></p>
           <p class="credits-meta">Obra con derechos reservados (Francisco Urondo, 1930-1976). Cita breve conforme al derecho de cita (art. 10, Ley 11.723, Argentina).</p>
         </div>
         <div class="credits-item">
@@ -154,7 +177,7 @@ la realidad.</p>
 en el fondo del mar
 en el silencio de las aguas
 hay cadáveres.</p>
-          <p class="credits-meta">Néstor Perlongher, <i>Cadáveres, 1984</i>. Néstor Perlongher, Alambres, Editorial Último Reino, Buenos Aires, 1987; recogido en Poemas completos (1980-1992), Seix Barral, Buenos Aires, 1997, p. 119. <a href="https://catalogo.bn.gov.ar/" target="_blank" rel="noopener noreferrer">https://catalogo.bn.gov.ar/</a></p>
+          <p class="credits-meta">Néstor Perlongher, <i>Cadáveres, 1984</i>. Néstor Perlongher, Alambres, Editorial Último Reino, Buenos Aires, 1987; recogido en Poemas completos (1980-1992), Seix Barral, Buenos Aires, 1997, p. 119. <a href="https://archive.org/details/NestorPerlongher" target="_blank" rel="noopener noreferrer">https://archive.org/details/NestorPerlongher</a></p>
           <p class="credits-meta">Obra con derechos reservados (Néstor Perlongher, 1949-1992). Cita breve conforme al derecho de cita (art. 10, Ley 11.723, Argentina).</p>
         </div>
 <!--CREDITOS:END--></div>
@@ -163,6 +186,9 @@ hay cadáveres.</p>
       </div>
     </section>
   </main>
+  <div id="interpoema" aria-hidden="true"><p class="inter-poema"></p><p class="inter-autor"></p></div>
+  <div id="sr-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <nav id="hud-progress" class="hud-progress" aria-label="Recorrido de artefactos"><span class="hud-track"><span class="hud-fill"></span></span><div class="hud-nodes"></div></nav>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
