@@ -4,135 +4,85 @@ type: registro
 
 # AGENTS.md: arte/fact0s
 
-Reglas de trabajo del repo. Autoridad: `usuario-en-sesión` > este archivo > `DESIGN.md` (decisiones visuales ya tomadas) > `PLAN.md` (orden de ejecución) > `SKILL.md`.
+Reglas de trabajo del repositorio. Autoridad: `usuario-en-sesión` > este archivo > `DESIGN.md` > `PLAN.md` > `SKILL.md`.
 
 El vault tiene su propio `AGENTS.md`; este archivo sólo aplica a la carpeta del proyecto.
 
 ## Qué es esta obra
 
-Seis objetos (El libro quemado, La silueta, Las tijeras, La televisión, Los pájaros, El vuelo) sobre la dictadura argentina, renderizados como arte ASCII. **La interactividad está en el texto, no en el modelo.** Es un dispositivo de lectura, no un juego: no hay clic, no hay recompensas, no hay partículas.
-
-El texto que se lee es material real: seis citas de poesía, literatura y documentos históricos del período, con procedencia y permiso anotados en `assets/texts/texts.json`. Ese archivo es la **única fuente de verdad**: `server.py` lo inyecta en el documento (`python server.py --bake` persiste el HTML estático en disco) para que el texto exista aunque no haya JavaScript ni servidor activo.
+Seis artefactos (`libro`, `silueta`, `tijeras`, `tv`, `pajaros`, `vuelo`) sobre la última dictadura cívico-militar argentina, renderizados como cuerpos tipográficos ASCII en tiempo real. Es un dispositivo de lectura y memoria: el texto literario y documental verificable en `assets/texts/texts.json` es la única fuente de verdad (`python server.py --bake` persiste el HTML estático en `index.html` para que todo el contenido exista sin JavaScript ni servidor especial).
 
 ## Cómo se abre
 
 ```sh
-python server.py          # o iniciar.bat en Windows
-# http://localhost:8000
+python server.py
+# http://localhost:8022
 ```
 
-No requiere npm para visualizar: `vendor/` está commiteado. npm sólo hace falta para **reconstruir** `vendor/`.
+No requiere `npm` para visualizar: `vendor/` está commiteado. `npm` sólo se usa para reconstruir `vendor/` con `node build.mjs`.
 
 ## Stack
 
 | Capa | Qué | Dónde |
 |---|---|---|
-| Geometría | Three.js como **biblioteca de geometría únicamente**. No hay renderer WebGL. | `vendor/three.js` |
+| Geometría | Three.js como biblioteca de geometría pura (sin renderer WebGL) | `vendor/three.js` |
 | Raster | glyphcss: `Polygon[]` -> texto en un `<pre>` del DOM | `vendor/glyphcss.js` |
 | Puente | Three.js `BufferGeometry` -> `Polygon[]` con color por cara monocromo papel | `src/geometry.js` |
-| Escena | Escena glyphcss + esculpido continuo del texto sobre la grilla (`fitMultiState`) | `src/glyph-stage.js` |
-| Modelos | Los seis artefactos, procedurales. Cada uno es `update(p)`: una función pura del progreso. | `src/modelos/*.js` |
-| Servidor | Python stdlib: estático, inyecta con escape HTML el corpus en el documento y soporta `--bake` | `server.py` |
+| Iluminación | Rigs de tres luces por pieza (`libro`, `silueta`, `tijeras`, `tv`, `pajaros`, `vuelo`) + AO en profundidad | `src/lighting.js` |
+| Escena | Escena glyphcss, esculpido del poema, estática CRT, hit-test de glifos y `fitMultiState` | `src/glyph-stage.js` |
+| Scroll | `ScrollPacer` con tope adaptable en salida/interpoema y viaje suave (`glideTo`) desde el HUD | `src/scroll.js` |
+| Modelos | Los seis artefactos procedurales en español (`crearLibro`, `crearSilueta`, `crearTijeras`, `crearTv`, `crearPajaros`, `crearVuelo`) | `src/modelos/*.js` |
+| Servidor | Python stdlib: estático, inyecta con escape HTML el corpus en `index.html` y soporta `--bake` y `--dev` | `server.py` |
 
 ## Mapa de archivos
 
 ```
-index.html            documento con umbral, citas pre-horneadas e importmap (three / glyphcss)
-style.css             sistema visual completo (tokens, @property --glow, tipografía, layout mobile)
-DESIGN.md             decisiones de diseño e interacción. Manda sobre style.css
-PLAN.md               plan de ejecución por etapas
-HANDOFF.md            estado real, evidencia y pendientes: por dónde se reanuda
-AGENTS.md             este archivo
-src/main.js           bootstrap: fuente, corpus, seis piezas, scroll, teclado, arrastre
-src/geometry.js       conversor Three.js -> Polygon[] con clampPaperColor WCAG AA
-src/glyph-stage.js    escena glyphcss, grilla, esculpido continuo, encuadre multi-estado
-src/modelos/*.js      los seis artefactos monocromo
-assets/texts/         corpus de citas verificadas (fuente de verdad del texto)
-assets/fonts/         Sligoil Micro (trama ASCII), Newsreader (lectura)
-vendor/               bundles commiteados: three, glyphcss
-tools/                encuadre y verificación: siluetas, poses, capturas, costo
-docs/VALIDACION.md    criterios de cierre de la obra y cómo se miden
-LICENSE.md            licencias de código, tipografía y textos de la obra
+index.html                  documento con loader, citas pre-horneadas, HUD e importmap
+style.css                   sistema visual completo (tokens, tipografía, parallax, HUD, colofón)
+DESIGN.md                   decisiones de diseño, tipografía, parallax, HUD e interacción
+PLAN.md                     historial de etapas completadas y criterios de verificación
+HANDOFF.md                  estado actual verificado y métricas en vivo
+AGENTS.md                   este archivo
+LICENSE.md                  licencias de código, tipografía y derecho de cita
+server.py                   servidor local e inyector de corpus (--bake)
+build.mjs                   empaquetador esbuild para vendor/
+src/main.js                 bootstrap: fuentes, corpus, seis piezas, parallax, interpoemas, HUD, teclado y arrastre
+src/geometry.js             conversor Three.js -> Polygon[] con clampPaperColor WCAG AA
+src/lighting.js             iluminación de estudio monocromo cálido y oclusión ambiental
+src/glyph-stage.js          escena glyphcss, grilla, esculpido continuo, encuadre multi-estado y hitTestClient
+src/scroll.js               ScrollPacer y SmoothScrollController
+src/bg.js                   fondo vivo de siluetas en canvas por tiles sucios
+src/typewriter.js           máquina de escribir acoplada al scroll
+src/dissolve.js             disolución de títulos
+src/modelos/compartido.js   constructores Three.js, levitación y flujo de versos
+src/modelos/libro.js        El libro quemado (crearLibro)
+src/modelos/silueta.js      La silueta (crearSilueta)
+src/modelos/tijeras.js      Las tijeras (crearTijeras)
+src/modelos/tv.js           La televisión (crearTv)
+src/modelos/pajaros.js      Los pájaros (crearPajaros)
+src/modelos/vuelo.js        El vuelo (crearVuelo)
+assets/texts/texts.json     corpus de citas verificadas (fuente de verdad del texto)
+assets/fonts/               Sligoil Micro, Paper Mono y Newsreader
+vendor/                     bundles commiteados: three.js y glyphcss.js
+tools/                      verificación automatizada: checks.mjs, cdp.mjs, verify-nojs.mjs, perf.mjs
 ```
 
 ## Reglas duras
 
-1. **Nada de clic izquierdo.** Ningún handler de `click`/`pointerdown` sobre el escenario que dispare estado del modelo. La rueda hace scroll; el arrastre sólo gira.
-2. **Nada de partículas.** Ni de fondo ni de estado. Si una escena necesita atmósfera, se resuelve con color, glifo o textura.
-3. **El texto manda.** El bloque legible en el DOM es el contenido. La capa ASCII es la inscripción, no el mensaje.
-4. **El estado es función del progreso.** `state = f(p)`, sin memoria ni acumuladores: subir deshace lo que bajar hizo.
-5. **Cero extrapolación en el corpus.** Cada cita con autor, obra, año y edición/URL. Si no está verificado, `status: "placeholder"`.
-6. **Cero colores inventados**: la paleta y la tipografía están fijadas en `DESIGN.md` y en los tokens de `style.css`.
-
-## Decisiones técnicas que ya costaron sangre
-
-No romperlas. Cada una tiene una razón y una trampa:
-
-- **Ejes**: Three.js es Y-up, glyphcss es Z-up. El mapeo correcto es `(x, -z, y)`: una **rotación**. La reflexión `(x, z, y)` invierte la orientación de las caras y el objeto sale del reves.
-- **Celda y `<pre>`**: el ancho del `<pre>` tiene que ser exactamente `cols × cellW` de la grilla que resolvió la escena (`handle.getBaseResolution()`). Si no, la última celda envuelve a la fila siguiente y aparece una franja vertical en el borde.
-- **CSS de glyphcss**: la librería inyecta `.glyph-scene .glyph-output { font-family: monospace; font-size: inherit; line-height: 1 }` con especificidad 0,2,0. La trama usa **0,3,0** (`.stage .glyph-scene .glyph-output`): si no, el `font-size: inherit` gana y la trama sale a 20 px en vez de 10, y todo el encuadre cambia.
-- **Celdas superpuestas**: las nueve hojas del libro están a menos de una celda de distancia. Sin `depthEpsilon` la trama hierve de z-fighting. Va en `0.02`.
-- **Tipografía**: la fuente falla en silencio. El primer render espera `document.fonts.ready` y mide el avance real de la celda; si la fuente no cargó, se cae a `ui-monospace` con el mismo `font-size`.
-- **Ejes de la cámara**: `rotX`/`rotY` están en **grados**. Cada artefacto tiene su propia pose en `POSES` (`src/main.js`); no hay una pose genérica. Para calibrar una pose sin tocar código: `?piece=book&rx=90&ry=180`.
-- **El encuadre se mide sobre la grilla resuelta**: `stage.resize()` tiene que correr antes de `stage.fit()`. Si se mide antes, la grilla es la de 80×24 del default de glyphcss y la pieza queda diminuta.
-- **El sombreado suave no vale lo que cuesta**: `smoothShading: true` multiplica por siete el costo del raster (52,8 ms contra 9,5) y solo cambia el 0,07 % de los píxeles. Va en `false`.
-- **Sin JavaScript el texto tiene que estar en el DOM**: por eso `server.py` inyecta el corpus en `index.html`. El JS solo completa lo que falta.
-- **`rAF` no corre en headless con `--dump-dom`**: para verificar de verdad, usar el CDP de `tools/cdp.mjs`, que sí ejecuta la página con cuadros reales.
-- **La query string rompe la inyección del corpus**: `server.py` tiene que sacar el query con `urlparse` antes de decidir si sirve el documento. Con `?piece=book` el `index.html` llegaba sin las citas y la obra se veía vacía: todas las herramientas de calibración vinieron midiendo una página sin texto.
-- **El headless reporta movimiento reducido**: el estado se cuantiza en cuatro escalones y la verificación mide un camino que la gente no ve. Hay que forzar `no-preference` con `Emulation.setEmulatedMedia`.
-- **El navegador restaura el scroll al recargar**: las posiciones de las secciones se leen con `offsetTop`, no con `getBoundingClientRect` + `scrollY`, que con el scroll restaurado mide cualquier cosa.
-- **El perfil de Chromium es persistente**: la caché sirve módulos viejos y el navegador restaura el scroll de la sesión anterior. `tools/cdp.mjs` desactiva la caché por CDP, pone `scrollRestoration` en manual y usa un perfil nuevo por corrida en las herramientas de captura.
-- **La trama mide 14 px de celda**: a 10 px el poema no se leía de lejos. La grilla resuelta bajó a 95 × 53; ése es el precio de la legibilidad.
-- **La inscripción se arma en el motor**: las palabras se separan con `·` y cada verso arranca en una fila. El frente de fuego son glifos (`^/\|*~"` y `.,`), no partículas: el modelo declara el avance con `burn(p)` y el motor lo pinta.
-- **La pieza activa es la última que pasó por el centro**: el cierre (que no es una pieza) no puede dejar al escenario en la primera pieza. Con la regla de "la sección que contiene el centro", el colofón se leía sobre el libro.
-- **Las fuentes viven en la obra**: la sección de créditos del documento es el único lugar donde están las referencias. `docs/FUENTES.md` se absorbió ahí y se borró; no volver a duplicarlas en un documento aparte.
-
+1. **Cursor contextual**: el escenario tiene `cursor: default` y sólo cambia a `grab` (`grabbing` al arrastrar) cuando `stage.hitTestClient(clientX, clientY)` detecta que el puntero está sobre los glifos del modelo 3D.
+2. **Transición limpia modelo -> poema -> modelo**: al terminar la animación de cada pieza, el modelo asciende hasta salir por completo de la pantalla (`translate3d` sobre `.glyph-scene`) antes del fade-out a negro; luego aparece el poema en `#interpoema` con su autor; para pasar al siguiente modelo, el poema hace fade-out con parallax sin borrar su texto, y recién cuando termina el fade-out entra el siguiente modelo.
+3. **Narrativa con parallax sin fade-out**: los textos `.narrativa` de cada modelo tienen escala editorial (`clamp(30px, 3.6vw, 50px)`), entran con fade-in y viajan hacia arriba con parallax hasta salir por el borde superior de la pantalla sin desvanecerse por opacidad.
+4. **Barra de recorrido lateral (`#hud-progress`)**: centrada verticalmente a la derecha, sin numeración `01 / 06`. Muestra la línea base siempre con baja opacidad, ilumina el progreso real en ámbar, marca en naranja los nodos recorridos, despliega el título flotante sin contenedor (sin bordes ni fondo) al hacer hover y viaja de forma fluida (`scrollPacer.glideTo`) al hacer clic.
+5. **Cero extrapolación en el corpus**: cada cita en `assets/texts/texts.json` respeta los saltos de verso originales (`\n`) y registra autor, obra, año, fuente primaria verificada y encuadre legal (art. 10, Ley 11.723).
+6. **Modelos y comentarios en español**: los modelos viven en `src/modelos/` con nombres y constructores en español (`libro.js`, `silueta.js`, `tijeras.js`, `tv.js`, `pajaros.js`, `vuelo.js`, `compartido.js`), y el código lleva únicamente marcas estructurales cortas (`// Libro`, `// Scroll`, `// Iluminacion`).
 
 ## Comandos
 
 ```sh
-npm install && npm run build   # re-bundlea vendor/ (three, glyphcss)
 python server.py --bake        # hornea las citas y créditos en index.html
-python server.py               # sirve en :8000
+python server.py               # sirve en :8022
+node tools/checks.mjs          # chequeos estáticos de ejes, ventana de estado y LUTs
+node tools/cdp.mjs scroll all  # recorre las 6 piezas con scroll real y verifica consola limpia
+node tools/verify-nojs.mjs     # verifica las 6 piezas y textos en el DOM sin JavaScript
+node tools/perf.mjs            # mide conversión, render, FPS durante scroll y peor cuadro
 ```
-
-**`npm install` falla en `G:`.** El drive no soporta la extracción de tar de npm (deja archivos de 0 bytes). Instalar el toolchain en disco local (`C:\Users\Usuario\AppData\Local\Temp`) y copiar sólo `vendor/*.js` de vuelta. `vendor/` va commiteado: la obra tiene que abrirse sin npm.
-
-## Checks antes de cerrar
-
-- El navegador no tira errores de consola y no hay pedidos 404 (el `index.html`, `style.css`, `src/*`, `vendor/*`, `assets/*`).
-- La trama se ve en el escenario, con la tipografía de lectura en la columna.
-- `python .agents/scripts/slop_lint.py` no aplica (no es un documento del vault), pero `PLAN.md`, `DESIGN.md` y `AGENTS.md` no llevan prosa de IA.
-- Todo texto nuevo del corpus tiene procedencia verificada.
-- La obra se recorre entera: `node tools/cdp.mjs scroll all` (las seis piezas, cada una de 0 a 1, consola limpia).
-- Sin JavaScript: `node tools/verify-nojs.mjs` (seis piezas apiladas, texto completo en el DOM).
-- El costo por cuadro: `node tools/perf.mjs` (fps en scroll continuo y peor cuadro).
-- Los criterios de `docs/VALIDACION.md` están ejecutados y con su evidencia.
-
-## Herramientas
-
-Todas usan el Chrome instalado en la máquina
-(`C:\Users\Usuario\AppData\Local\Google\Chrome\Application\chrome.exe`); no piden npm
-ni instalación. El servidor tiene que estar corriendo en el puerto 8000 para
-las que hablan con la página.
-
-| Herramienta | Para qué |
-|---|---|
-| `tools/dump-pose.mjs <pieza> [rx] [ry] [p]` | Volca la silueta en texto plano, para leerla como imagen |
-| `tools/dump-sweep.mjs <pieza> "<rx,ry> ..." [p]` | Barre poses y mide la silueta de cada una |
-| `tools/find-pose.mjs <pieza> [p]` | Ordena la grilla de poses por partedura: una pieza partida en dos lóbulos es la que se lee |
-| `tools/shot.mjs <pieza> <salida.png> [rx] [ry] [p]` | Captura la pieza en imagen |
-| `tools/shot-at.mjs <salida.png> <scrollY>` | Captura la obra en una posición del recorrido |
-| `tools/silhouette-bbox.mjs <salida.html>` | Caja envolvente de la silueta y grilla resuelta |
-| `tools/cdp.mjs scroll all` | Recorre la obra con scroll real y reporta estado, glow y consola |
-| `tools/cdp.mjs eval "<expr>"` | Evalúa una expresión en la página viva |
-| `tools/cdp.mjs shot <salida.png> [pieza] [p] [rx] [ry]` | Captura la pieza rasterizada, con la pose y el estado que se pidan |
-| `tools/verify-nojs.mjs` | Verifica la obra con la ejecución de scripts deshabilitada |
-| `tools/perf.mjs` | Mide conversión, render, fps y peor cuadro |
-| `tools/compare-raster.mjs` / `compare-shade.mjs` | Compara opciones del raster en imagen y en costo |
-
-## Vocabulario
-
-- Identificadores, rutas, commits y comentarios de código: **inglés**.
-- Documentación (`DESIGN.md`, `PLAN.md`, `AGENTS.md`, `README.md`): **español rioplatense**.
-- Comentarios de código: sólo el porqué, una línea, en español.

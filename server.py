@@ -207,7 +207,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 # Arranque
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--port', type=int, default=8000)
+    parser.add_argument('--port', type=int, default=8022)
     parser.add_argument('--bake', action='store_true', help='Actualiza index.html en disco con citas y créditos pre-renderizados.')
     parser.add_argument('--dev', action='store_true', help='Modo desarrollo: live-reload por SSE, /events y Clear-Site-Data.')
     args = parser.parse_args()
